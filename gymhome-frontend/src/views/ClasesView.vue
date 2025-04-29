@@ -1,98 +1,84 @@
 <template>
   <div class="clases-container">
     <h1>Clases Disponibles</h1>
-    
-    <!-- Verifica si las clases están cargadas y muestra un mensaje si no hay clases disponibles -->
-    <div v-if="clases.length > 0">
+
+    <div v-if="clases.length === 0">
+      <p>No hay clases disponibles en este momento.</p>
+    </div>
+
+    <div v-else>
       <div v-for="clase in clases" :key="clase.id" class="clase-card">
-        <h3>{{ clase.nombre }}</h3>
-        <p><strong>Instructor:</strong> {{ clase.instructor }}</p>
-        <p><strong>Horario:</strong> {{ clase.horario }}</p>
-        <button @click="verDetalles(clase)">Ver detalles</button>
+        <h2>{{ clase.nombre }}</h2>
+        <p>{{ clase.descripcion }}</p>
+        <p><strong>Duración:</strong> {{ clase.duracion }}</p>
+        <button @click="verClase(clase.id)">Ver Detalles</button>
       </div>
     </div>
-    
-    <!-- Mensaje si no hay clases disponibles o cargando -->
-    <p v-else-if="cargando">Cargando clases...</p>
-    <p v-else>No hay clases disponibles en este momento.</p>
-    
-    <!-- Mostrar error si este ocurre -->
-    <p v-if="error" class="error">Hubo un problema al cargar las clases. Intenta nuevamente más tarde.</p>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+import { useRouter } from 'vue-router';
 
-const clases = ref([])
-const cargando = ref(true)
-const error = ref(false)
+const clases = ref([]);
+const router = useRouter();
 
 const obtenerClases = async () => {
   try {
-    const response = await axios.get('http://localhost:3001/api/clases')
-    clases.value = response.data
-  } catch (err) {
-    error.value = true
-    console.error('Error al obtener las clases:', err)
-  } finally {
-    cargando.value = false
+    const response = await axios.get('http://localhost:3001/api/clases');
+    clases.value = response.data;
+  } catch (error) {
+    console.error('Error al obtener las clases:', error);
   }
-}
+};
 
-const verDetalles = (clase) => {
-  alert(`Detalles de la clase: ${clase.nombre}`)
-}
+onMounted(() => {
+  obtenerClases();
+});
 
-onMounted(obtenerClases)
+const verClase = (id) => {
+  router.push(`/clase/${id}`);
+};
 </script>
 
 <style scoped>
 .clases-container {
   padding: 20px;
-  max-width: 1200px;
+  max-width: 800px;
   margin: auto;
 }
 
+h1 {
+  text-align: center;
+  color: #2563eb;
+  margin-bottom: 20px;
+}
+
 .clase-card {
-  background: #fff;
+  background-color: #f9fafb;
   padding: 20px;
   margin-bottom: 20px;
-  border-radius: 8px;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-.clase-card:hover {
-  transform: translateY(-5px);
+h2 {
+  color: #2563eb;
 }
 
-.clase-card h3 {
-  margin-bottom: 10px;
-}
-
-.clase-card button {
-  background-color: #4f46e5;
+button {
+  background-color: #2563eb;
   color: white;
-  padding: 10px;
+  padding: 10px 16px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  transition: background-color 0.3s;
 }
 
-.clase-card button:hover {
-  background-color: #4338ca;
-}
-
-.error {
-  color: red;
-  font-weight: bold;
-}
-
-@media (max-width: 768px) {
-  .clase-card {
-    margin: 10px;
-  }
+button:hover {
+  background-color: #1d4ed8;
 }
 </style>

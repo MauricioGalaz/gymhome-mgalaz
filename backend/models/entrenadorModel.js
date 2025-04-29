@@ -1,4 +1,4 @@
-const pool = require('../config/db');
+import pool from '../config/db.js'; 
 
 const EntrenadorModel = {
   obtenerTodos: async () => {
@@ -15,9 +15,14 @@ const EntrenadorModel = {
     return res.rows[0];
   },
 
-  obtenerPorId: async (id) => {
-    const res = await pool.query('SELECT * FROM entrenadores WHERE id = $1', [id]);
-    return res.rows[0];
+  obtenerEntrenadores: async () => {  
+    try {
+      const result = await pool.query('SELECT * FROM entrenadores');
+      return result.rows;
+    } catch (err) {
+      console.error('Error al obtener entrenadores:', err.message);
+      throw err;
+    }
   },
 
   eliminar: async (id) => {
@@ -25,4 +30,5 @@ const EntrenadorModel = {
   }
 };
 
-module.exports = EntrenadorModel;
+export default EntrenadorModel;
+

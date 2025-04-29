@@ -1,6 +1,7 @@
-const PagoModel = require('../models/pagoModel');
+import PagoModel from '../models/pagoModel.js';
 
 const PagoController = {
+  // Listar pagos por usuario
   listarPorUsuario: async (req, res) => {
     try {
       const pagos = await PagoModel.obtenerPorUsuario(req.params.usuario_id);
@@ -11,6 +12,7 @@ const PagoController = {
     }
   },
 
+  // Registrar un nuevo pago
   registrar: async (req, res) => {
     try {
       const nuevo = await PagoModel.registrar(req.body);
@@ -22,4 +24,4 @@ const PagoController = {
   }
 };
 
-module.exports = PagoController;
+export default PagoController;

@@ -1,8 +1,13 @@
-const express = require('express');
+import express from 'express';
+import EjercicioController from '../controllers/ejercicioController.js'; 
+
 const router = express.Router();
-const EjercicioController = require('../controllers/ejercicioController');
 
-router.get('/', EjercicioController.listar);
-router.post('/', EjercicioController.crear);
+// rutas de los ejercicio
+router.get('/', EjercicioController.obtenerEjercicios);        
+router.get('/:id', EjercicioController.obtenerEjercicioPorId); 
+router.post('/', EjercicioController.crearEjercicio);         
+router.put('/:id', EjercicioController.actualizarEjercicio);  
+router.delete('/:id', EjercicioController.eliminarEjercicio); 
 
-module.exports = router;
+export default router;

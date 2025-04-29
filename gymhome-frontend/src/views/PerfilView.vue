@@ -1,144 +1,155 @@
 <template>
   <div class="perfil-container">
-    <h1>Perfil del Usuario</h1>
+    <h1>Perfil de Usuario</h1>
 
-    <div v-if="usuario">
-      <div class="perfil-details">
-        <p><strong>Nombre:</strong> {{ usuario.nombre }}</p>
-        <p><strong>Email:</strong> {{ usuario.email }}</p>
-        <p><strong>Teléfono:</strong> {{ usuario.telefono }}</p>
-        <p><strong>Rol:</strong> {{ usuario.rol }}</p>
-      </div>
-
-      <div v-if="usuario.rol === 'admin'" class="mt-4 text-green-700 font-bold">
-        🛠️ Eres Administrador. Puedes gestionar usuarios, clases y más.
-      </div>
-      <div v-else class="mt-4 text-blue-700 font-bold">
-        🙋 Rol de Usuario. Acceso limitado.
-      </div>
-
-      <button @click="editarPerfil" class="btn-editar">Editar Perfil</button>
-
-      <!-- Formulario para editar perfil -->
-      <div v-if="editando" class="perfil-edit-form">
-        <h2>Editar Perfil</h2>
-        <form @submit.prevent="guardarPerfil">
-          <label for="nombre">Nombre</label>
-          <input type="text" v-model="usuario.nombre" id="nombre" />
-
-          <label for="email">Email</label>
-          <input type="email" v-model="usuario.email" id="email" />
-
-          <label for="telefono">Teléfono</label>
-          <input type="text" v-model="usuario.telefono" id="telefono" />
-
-          <button type="submit">Guardar Cambios</button>
-        </form>
-      </div>
+    <div class="perfil-info">
+      <h2>{{ usuario.nombre }}</h2>
+      <p><strong>Email:</strong> {{ usuario.email }}</p>
+      <p><strong>Fecha de registro:</strong> {{ new Date(usuario.fechaRegistro).toLocaleDateString() }}</p>
     </div>
 
-    <p v-else>Cargando perfil...</p>
+    
+    <div v-if="recomendaciones">
+      <h3>Recomendaciones:</h3>
+      <p>{{ recomendaciones }}</p>
+    </div>
+
+    
+    <div v-if="progresos.length === 0">
+      <p>No hay registros de progreso disponibles.</p>
+    </div>
+
+    <div v-else>
+      <table class="progreso-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Plan</th>
+            <th>Avance (%)</th>
+            <th>Fecha</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="progreso in progresos" :key="progreso.id">
+            <td>{{ progreso.id }}</td>
+            <td>{{ progreso.plan_id }}</td>
+            <td>{{ progreso.avance }}%</td>
+            <td>{{ new Date(progreso.fecha).toLocaleDateString() }}</td>
+            <td><button @click="verProgreso(progreso.id)">Ver Detalles</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
 
-const usuario = ref(null)
-const editando = ref(false)
-const token = localStorage.getItem('token')
+const usuario = ref({});
+const progresos = ref([]);
+const recomendaciones = ref('');
 
-const api = axios.create({
-  baseURL: 'http://localhost:3001/api',
-  headers: {
-    Authorization: `Bearer ${token}`
-  }
-})
-
-const obtenerPerfil = async () => {
+// Obtener datos del usuario
+const obtenerUsuario = async () => {
   try {
-    const response = await api.get('/usuario/perfil')
-    usuario.value = response.data
-    // Guarda el rol en localStorage para usarlo en otras vistas
-    localStorage.setItem('usuario', JSON.stringify(response.data))
+    const response = await axios.get('http://localhost:3001/api/usuario');
+    usuario.value = response.data;
   } catch (error) {
-    console.error('Error al obtener el perfil:', error)
+    console.error('Error al obtener los datos del usuario:', error);
   }
-}
+};
 
-const editarPerfil = () => {
-  editando.value = true
-}
-
-const guardarPerfil = async () => {
+// Obtener los progresos de usuario
+const obtenerProgresos = async () => {
   try {
-    await api.put('/usuario/perfil', usuario.value)
-    editando.value = false
-    alert('Perfil actualizado con éxito')
+    const response = await axios.get('http://localhost:3001/api/progresousuario');
+    progresos.value = response.data;
   } catch (error) {
-    console.error('Error al guardar el perfil:', error)
+    console.error('Error al obtener los progresos de usuario:', error);
   }
-}
+};
 
-onMounted(obtenerPerfil)
+// Obtener recomendaciones personalizadas de IA
+const obtenerRecomendaciones = async () => {
+  try {
+    const response = await axios.get(`http://localhost:3001/api/recomendaciones/1`);   
+
+  } catch (error) {
+    console.error('Error al obtener recomendaciones:', error);
+  }
+};
+
+onMounted(() => {
+  obtenerUsuario();
+  obtenerProgresos();
+  obtenerRecomendaciones();
+});
+
+const verProgreso = (id) => {
+  // ver el progreso de un plan
+};
 </script>
-
 
 <style scoped>
 .perfil-container {
   padding: 20px;
+  max-width: 1000px;
+  margin: auto;
 }
 
-.perfil-details {
+h1 {
+  text-align: center;
+  color: #2563eb;
   margin-bottom: 20px;
 }
 
-.perfil-edit-form {
-  margin-top: 20px;
-  background-color: #f3f4f6;
+.perfil-info {
+  margin-bottom: 30px;
+  background-color: #f9fafb;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
-.perfil-edit-form form {
-  display: flex;
-  flex-direction: column;
+h2 {
+  color: #1f2937;
 }
 
-.perfil-edit-form label {
-  margin-bottom: 8px;
+.progreso-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
 }
 
-.perfil-edit-form input {
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 8px;
+.progreso-table th, .progreso-table td {
+  padding: 12px;
   border: 1px solid #ddd;
+  text-align: left;
 }
 
-.perfil-edit-form button {
-  background-color: #4f46e5;
-  color: white;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-}
-
-.perfil-edit-form button:hover {
-  background-color: #4338ca;
-}
-
-.btn-editar {
+.progreso-table th {
   background-color: #2563eb;
   color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
 }
 
-.btn-editar:hover {
+.progreso-table td {
+  background-color: #f9fafb;
+}
+
+button {
+  background-color: #2563eb;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
   background-color: #1d4ed8;
 }
 </style>

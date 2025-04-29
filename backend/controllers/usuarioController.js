@@ -1,15 +1,15 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const UsuarioModel = require('../models/usuarioModel');
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import UsuarioModel from '../models/usuarioModel.js';
 
-const UsuarioController = {
+const usuarioController = {
   // Obtener todos los usuarios
   listarUsuarios: async (req, res) => {
     try {
       const usuarios = await UsuarioModel.obtenerTodos();
       res.json(usuarios);
     } catch (error) {
-      console.error('Error en listarUsuarios:', error);
+      console.error('Error al listar usuarios:', error.message);
       res.status(500).json({ mensaje: 'Error al obtener usuarios' });
     }
   },
@@ -17,19 +17,28 @@ const UsuarioController = {
   // Crear un nuevo usuario
   crearUsuario: async (req, res) => {
     try {
-      const { email, contrasena, nombre, rol } = req.body;
+      const { nombre, email, contrasena, rol } = req.body;
 
-      if (!email || !contrasena || !nombre || !rol) {
+      if (!nombre || !email || !contrasena || !rol) {
         return res.status(400).json({ mensaje: 'Todos los campos son obligatorios' });
       }
 
-      const usuarioExistente = await UsuarioModel.obtenerPorEmail(email);
+      // Verificar si ya existe el usuario
+      let usuarioExistente = null;
+      try {
+        usuarioExistente = await UsuarioModel.obtenerPorEmail(email);
+      } catch (error) {
+        
+      }
+
       if (usuarioExistente) {
         return res.status(400).json({ mensaje: 'El correo ya está registrado' });
       }
 
+      // Hashear contraseña
       const hashedPassword = await bcrypt.hash(contrasena, 10);
 
+      // Crear usuario
       const nuevoUsuario = await UsuarioModel.crear({
         nombre,
         email,
@@ -42,7 +51,7 @@ const UsuarioController = {
         usuario: nuevoUsuario
       });
     } catch (error) {
-      console.error('Error en crearUsuario:', error);
+      console.error('Error en crearUsuario:', error.message);
       res.status(500).json({ mensaje: 'Error al crear usuario' });
     }
   },
@@ -56,14 +65,7 @@ const UsuarioController = {
         return res.status(404).json({ mensaje: 'Usuario no encontrado' });
       }
 
-      // LOG: Ver contraseñas para depuración
-      console.log('🔑 Contraseña ingresada:', contrasena);
-      console.log('🧂 Hash guardado en la BD:', usuario.contrasena);
-
       const contrasenaValida = await bcrypt.compare(contrasena, usuario.contrasena);
-
-      console.log('✅ ¿Contraseña válida?', contrasenaValida);
-
       if (!contrasenaValida) {
         return res.status(401).json({ mensaje: 'Contraseña incorrecta' });
       }
@@ -71,7 +73,7 @@ const UsuarioController = {
       const token = jwt.sign(
         { id: usuario.id, email: usuario.email, rol: usuario.rol },
         process.env.JWT_SECRET,
-        { expiresIn: '7d' }
+        { expiresIn: '21d' }
       );
 
       res.json({
@@ -84,10 +86,10 @@ const UsuarioController = {
         }
       });
     } catch (error) {
-      console.error('Error en login:', error);
+      console.error('Error en login:', error.message);
       res.status(500).json({ mensaje: 'Error al iniciar sesión' });
     }
   }
 };
 
-module.exports = UsuarioController;
+export default usuarioController;

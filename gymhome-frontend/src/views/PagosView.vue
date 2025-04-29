@@ -1,69 +1,109 @@
 <template>
   <div class="pagos-container">
-    <h1>Pagos Pendientes</h1>
-    
-    <div v-if="pagos.length > 0">
-      <div v-for="pago in pagos" :key="pago.id" class="pago-card">
-        <h3>Plan: {{ pago.plan }}</h3>
-        <p><strong>Fecha de Vencimiento:</strong> {{ pago.fechaVencimiento }}</p>
-        <p><strong>Monto:</strong> {{ pago.monto | currency }}</p>
-        <button @click="realizarPago(pago)">Realizar Pago</button>
-      </div>
+    <h1>Gestión de Pagos</h1>
+
+    <div v-if="pagos.length === 0">
+      <p>No hay pagos registrados.</p>
     </div>
-    <p v-else>Cargando pagos...</p>
+
+    <div v-else>
+      <table class="pagos-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Usuario</th>
+            <th>Monto</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="pago in pagos" :key="pago.id">
+            <td>{{ pago.id }}</td>
+            <td>{{ pago.usuario_id }}</td>
+            <td>${{ pago.monto }}</td>
+            <td>{{ new Date(pago.fecha).toLocaleDateString() }}</td>
+            <td>{{ pago.estado }}</td>
+            <td><button @click="verPago(pago.id)">Ver Detalles</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+import { useRouter } from 'vue-router';
 
-const pagos = ref([])
+const pagos = ref([]);
+const router = useRouter();
 
 const obtenerPagos = async () => {
   try {
-    const response = await axios.get('http://localhost:3001/api/pagos') 
-    pagos.value = response.data
+    const response = await axios.get('http://localhost:3001/api/pagos');
+    pagos.value = response.data;
   } catch (error) {
-    console.error('Error al obtener los pagos:', error)
+    console.error('Error al obtener los pagos:', error);
   }
-}
+};
 
-const realizarPago = (pago) => {
-  alert(`Realizando pago para el plan: ${pago.plan}`)
-  
-}
+onMounted(() => {
+  obtenerPagos();
+});
 
-onMounted(obtenerPagos)
+const verPago = (id) => {
+  router.push(`/pago/${id}`);
+};
 </script>
 
 <style scoped>
 .pagos-container {
   padding: 20px;
+  max-width: 1000px;
+  margin: auto;
 }
 
-.pago-card {
-  background: #fff;
-  padding: 20px;
+h1 {
+  text-align: center;
+  color: #2563eb;
   margin-bottom: 20px;
-  border-radius: 8px;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
 }
 
-.pago-card h3 {
-  margin-bottom: 10px;
+.pagos-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
 }
 
-.pago-card button {
-  background-color: #4f46e5;
+.pagos-table th, .pagos-table td {
+  padding: 12px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.pagos-table th {
+  background-color: #2563eb;
   color: white;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
 }
 
-.pago-card button:hover {
-  background-color: #4338ca;
+.pagos-table td {
+  background-color: #f9fafb;
+}
+
+button {
+  background-color: #2563eb;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #1d4ed8;
 }
 </style>

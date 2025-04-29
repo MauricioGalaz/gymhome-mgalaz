@@ -1,6 +1,7 @@
-const EntrenadorModel = require('../models/entrenadorModel');
+import EntrenadorModel from '../models/entrenadorModel.js';
 
 const EntrenadorController = {
+  // Listar todos los entrenadores
   listar: async (req, res) => {
     try {
       const entrenadores = await EntrenadorModel.obtenerTodos();
@@ -11,6 +12,7 @@ const EntrenadorController = {
     }
   },
 
+  // Crear un nuevo entrenador
   crear: async (req, res) => {
     try {
       const nuevo = await EntrenadorModel.crear(req.body);
@@ -21,6 +23,7 @@ const EntrenadorController = {
     }
   },
 
+  // Obtener un entrenador por ID
   obtener: async (req, res) => {
     try {
       const entrenador = await EntrenadorModel.obtenerPorId(req.params.id);
@@ -34,6 +37,7 @@ const EntrenadorController = {
     }
   },
 
+  // Eliminar un entrenador
   eliminar: async (req, res) => {
     try {
       await EntrenadorModel.eliminar(req.params.id);
@@ -45,4 +49,4 @@ const EntrenadorController = {
   }
 };
 
-module.exports = EntrenadorController;
+export default EntrenadorController;

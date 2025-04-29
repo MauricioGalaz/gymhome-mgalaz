@@ -1,83 +1,93 @@
 <template>
   <div class="dashboard-container">
-    <div class="sidebar">
-      <div class="logo-container">
-        <img src="https://www.example.com/path-to-your-logo.jpg" alt="GymHome Logo" class="logo" />
-      </div>
-      <router-link to="/dashboard" class="menu-link">Dashboard</router-link>
-      <router-link to="/planes" class="menu-link">Planes</router-link>
-      <router-link to="/clases" class="menu-link">Clases</router-link>
-      <router-link to="/perfil" class="menu-link">Perfil</router-link>
-      <router-link to="/pagos" class="menu-link">Pagos</router-link>
-      <router-link to="/reportes" class="menu-link">Reportes</router-link>
-      <a href="#" class="menu-link" @click.prevent="cerrarSesion">Cerrar sesión</a>
-    </div>
+    <div class="overlay"></div>
+    <div class="content">
+      <h1>Bienvenido al GymHome Limache</h1>
+      <p>Aquí puedes gestionar tus planes, clases y más.</p>
 
-    <main class="main-content">
-      <h1>Bienvenido al Dashboard</h1>
-      <p>Selecciona una opción del menú para comenzar.</p>
-    </main>
+      <div class="dashboard-actions">
+        <router-link to="/planes">
+          <button>Ver Planes</button>
+        </router-link>
+        <router-link to="/clases">
+          <button>Ver Clases</button>
+        </router-link>
+        <router-link to="/reportes">
+          <button>Ver Reportes</button>
+        </router-link>
+        <router-link to="/perfil">
+          <button>Perfil</button>
+        </router-link>
+        <router-link to="/pagos">
+          <button>Pagos</button>
+        </router-link>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
 
-const router = useRouter()
-
-const cerrarSesion = () => {
-  localStorage.removeItem('authToken')
-  localStorage.removeItem('usuario')
-  router.push('/') // Redirige al Login
-}
 </script>
 
 <style scoped>
 .dashboard-container {
-  display: flex;
+  background: linear-gradient(to right, #1e3a8a, #2563eb); 
   height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
 }
 
-.sidebar {
-  width: 250px;
-  background-color: #374151;
-  color: white;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  position: fixed;
+.overlay {
+  position: absolute;
   top: 0;
   left: 0;
-  height: 100%;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
 }
 
-.logo-container {
-  margin-bottom: 30px;
-  text-align: center;
-}
-
-.logo {
-  width: 80%;
-  max-width: 150px;
-}
-
-.menu-link {
+.content {
+  position: relative;
   color: white;
-  text-decoration: none;
-  margin-bottom: 16px;
-  font-size: 16px;
-  padding: 10px 0;
-}
-
-.menu-link:hover {
-  color: #93c5fd;
-}
-
-.main-content {
-  margin-left: 250px;
-  padding: 40px;
-  background-color: #f3f4f6;
-  flex-grow: 1;
   text-align: center;
+  max-width: 800px;
+  padding: 40px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 10px;
+}
+
+h1 {
+  font-size: 3em;
+  margin-bottom: 20px;
+}
+
+p {
+  font-size: 1.2em;
+  margin-bottom: 30px;
+}
+
+.dashboard-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+}
+
+button {
+  background-color: #2563eb;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1em;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #1d4ed8;
 }
 </style>

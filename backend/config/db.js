@@ -1,25 +1,15 @@
-require('dotenv').config();
-const { Pool } = require('pg');
+import { Pool } from 'pg';
+import dotenv from 'dotenv';
+
+// variables de entorno desde el archivo .env
+dotenv.config();
 
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'gymhomedb',
-  password: 'Mito011078',
-  port: 5432, // el puerto pgAdmin
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT || 5432, // Puerto de PostgreSQL
 });
 
-// conectar con la base de datos
-pool.connect()
-  .then(() => console.log('🟢 Conexión a PostgreSQL exitosa'))
-  .catch(err => console.error('🔴 Error de conexión a PostgreSQL:', err));
-
-// Cerrar la conexión cuando la aplicación se apague
-process.on('SIGINT', () => {
-  pool.end(() => {
-    console.log('🔴 Conexión a PostgreSQL cerrada');
-    process.exit(0);
-  });
-});
-
-module.exports = pool;
+export default pool;

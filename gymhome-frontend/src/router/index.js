@@ -16,7 +16,19 @@ const routes = [
   { path: '/clases', component: ClasesView, meta: { requiresAuth: true } },
   { path: '/perfil', component: PerfilView, meta: { requiresAuth: true } },
   { path: '/reportes', component: ReportesView, meta: { requiresAuth: true } },
-  { path: '/pagos', component: PagosView, meta: { requiresAuth: true } }
+  { path: '/pagos', component: PagosView, meta: { requiresAuth: true } },
+
+  {
+    path: '/planes/crear',
+    component: () => import('../views/EditPlanView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/planes/editar/:id',
+    component: () => import('../views/EditPlanView.vue'),
+    meta: { requiresAuth: true }
+  },
+  
 ]
 
 const router = createRouter({

@@ -1,47 +1,36 @@
 <template>
   <div id="app">
-    <Sidebar v-if="route.path !== '/'"/>
-    <div :class="{
-      'main-content': route.path !== '/',
-      'login-content': route.path === '/'
-    }">
+    <Sidebar />
+    <main :class="{ 'main-content': isAuthenticated }">
       <router-view />
-    </div>
+    </main>
   </div>
 </template>
 
 <script setup>
-import Sidebar from '@/components/Sidebar.vue'
-import { useRoute } from 'vue-router'
-import axios from '@/services/axios'
+import { ref, onMounted } from 'vue'
+import Sidebar from './components/Sidebar.vue'
 
-const token = localStorage.getItem('authToken')
-if (token) {
-  axios.defaults.headers['Authorization'] = `Bearer ${token}`
-} else {
-  console.log('No hay token almacenado')
-}
+const isAuthenticated = ref(false)
 
-const route = useRoute()
+onMounted(() => {
+  const token = localStorage.getItem('authToken')
+  isAuthenticated.value = !!token
+})
 </script>
 
 <style scoped>
-#app {
-  display: flex;
-  flex-direction: row;
-  height: 100vh;
-  overflow-x: hidden;
-}
-
 .main-content {
   margin-left: 220px;
-  flex-grow: 1;
-  background-color: #f9fafb;
   padding: 20px;
+  background: #f9fafb;
+  min-height: 100vh;
   overflow-y: auto;
 }
 
-.login-content {
-  width: 100%;
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+  }
 }
 </style>

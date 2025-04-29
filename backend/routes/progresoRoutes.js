@@ -1,8 +1,11 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const ProgresoController = require('../controllers/progresoController');
+import * as progresoController from '../controllers/progresoController.js'; 
 
-router.get('/:usuario_id', ProgresoController.listarPorUsuario);
-router.post('/', ProgresoController.registrar);
+// Ruta para listar progreso por usuario
+router.get('/:usuario_id', progresoController.listarPorUsuario);
 
-module.exports = router;
+// Ruta para registrar un nuevo progreso
+router.post('/', progresoController.registrar);
+
+export default router;

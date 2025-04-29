@@ -1,32 +1,38 @@
-const express = require('express');
-const bcrypt = require('bcryptjs');
-const Usuario = require('../models/Usuario'); 
+import express from 'express';
+import bcrypt from 'bcryptjs';
+import Usuario from '../models/Usuario.js'; 
 const router = express.Router();
 
 // Registro de usuario
 router.post('/register', async (req, res) => {
   const { nombre, correo, contraseña } = req.body;
 
+  // Validación de entrada
+  if (!nombre || !correo || !contraseña) {
+    return res.status(400).json({ mensaje: 'Todos los campos son obligatorios' });
+  }
+
   try {
-    // Verifica si el usuario ya existe
+    // Verificación si el usuario existe
     const usuarioExistente = await Usuario.findOne({ correo });
     if (usuarioExistente) {
       return res.status(400).json({ mensaje: 'El correo ya está registrado' });
     }
 
-    // Encripta la contraseña
+    // Encriptación de la contraseña
     const salt = await bcrypt.genSalt(10);
     const contraseñaHash = await bcrypt.hash(contraseña, salt);
 
-    // Crea el usuario
+    // Crear el usuario
     const nuevoUsuario = new Usuario({ nombre, correo, contraseña: contraseñaHash });
     await nuevoUsuario.save();
 
-    res.status(201).json({ mensaje: 'Usuario registrado con éxito' });
+    
+    res.status(201).json({ mensaje: 'Usuario registrado con éxito', usuario: { nombre, correo } });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ mensaje: 'Error al registrar el usuario' });
+    console.error('Error al registrar el usuario:', err);
+    res.status(500).json({ mensaje: 'Error al registrar el usuario', error: err.message });
   }
 });
 
-module.exports = router;
+export default router;

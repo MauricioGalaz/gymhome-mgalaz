@@ -1,18 +1,19 @@
-const pool = require('../config/db');
+import pool from '../config/db.js'; 
 
 const EjercicioModel = {
   obtenerTodos: async () => {
-    const res = await pool.query('SELECT * FROM "Ejercicios"');
-    return res.rows;
+    const result = await pool.query('SELECT * FROM ejercicios');
+    return result.rows;
   },
 
-  crear: async ({ nombre, descripcion, tipo, instrucciones }) => {
-    const res = await pool.query(
-      'INSERT INTO "Ejercicios" (nombre, descripcion, tipo, instrucciones) VALUES ($1, $2, $3, $4) RETURNING *',
-      [nombre, descripcion, tipo, instrucciones]
+  crear: async (ejercicio) => {
+    const { nombre, descripcion } = ejercicio;
+    const result = await pool.query(
+      'INSERT INTO ejercicios (nombre, descripcion) VALUES ($1, $2) RETURNING *',
+      [nombre, descripcion]
     );
-    return res.rows[0];
+    return result.rows[0];
   }
 };
 
-module.exports = EjercicioModel;
+export default EjercicioModel; 

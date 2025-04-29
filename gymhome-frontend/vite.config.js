@@ -11,6 +11,7 @@ export default defineConfig({
     }
   },
   server: {
+    port: 5174,  // puerto fronted
     proxy: {
       '/api': 'http://localhost:3001',
     },

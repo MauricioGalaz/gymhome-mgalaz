@@ -11,6 +11,10 @@
         <input v-model="email" type="email" placeholder="Correo electrónico" />
         <input v-model="password" type="password" placeholder="Contraseña (mín. 8)" />
         <input v-model="confirmPassword" type="password" placeholder="Confirmar contraseña" />
+        <select v-model="rol">
+          <option value="admin">Administrador</option>
+          <option value="user">Usuario</option>
+        </select>
         <button type="submit">Registrarse</button>
       </form>
     </div>
@@ -25,6 +29,7 @@ const nombre = ref('')
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
+const rol = ref('user') // valor predeterminado de rol
 
 const handleRegister = async () => {
   if (password.value !== confirmPassword.value) {
@@ -53,12 +58,14 @@ const handleRegister = async () => {
   }
 
   try {
-    const response = await axios.post('https://tu-api.com/registro', {
+    const response = await axios.post('http://localhost:3001/api/usuarios/signup', {
       nombre: nombre.value,
       email: email.value,
-      password: password.value
+      password: password.value,
+      rol: rol.value
     })
 
+    // Guardar el token en localStorage para usarlo en futuras solicitudes
     localStorage.setItem('token', response.data.token)
     alert('Registro exitoso')
   } catch (error) {
@@ -66,6 +73,11 @@ const handleRegister = async () => {
   }
 }
 </script>
+
+<style scoped>
+/* El mismo estilo que ya tienes */
+</style>
+
 
 <style scoped>
 .registro-container {

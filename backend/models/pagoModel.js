@@ -1,4 +1,4 @@
-const pool = require('../config/db');
+import pool from '../config/db.js';
 
 const PagoModel = {
   obtenerPorUsuario: async (usuario_id) => {
@@ -18,4 +18,4 @@ const PagoModel = {
   }
 };
 
-module.exports = PagoModel;
+export default PagoModel;
