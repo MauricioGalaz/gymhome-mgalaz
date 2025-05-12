@@ -1,46 +1,44 @@
-import { OpenAI } from "openai";
+import progresoModel from '../models/progresoModel.js';
 
-// Configuración de OpenAI
-const openai = new OpenAI({
-  apiKey: 'your-openai-api-key', // Reemplaza con tu clave API de OpenAI
-});
-
-// Función para obtener recomendaciones personalizadas
-export const obtenerRecomendaciones = async (req, res) => {
-  const { id } = req.params;
-  
-  // progreso del usuario desde la base de datos
-  const progresoUsuario = {
-    avance: 75,
-    dificultad: 'intermedio',
-    plan_id: 1,
-  };
-  
-  // Crear un prompt personalizado basado en el progreso del usuario
-  const prompt = `Usuario con ID ${id} ha completado un progreso de ${progresoUsuario.avance}% en su plan de entrenamiento de dificultad ${progresoUsuario.dificultad}. ¿Qué recomendaciones de ejercicios, alimentación o motivación le podrías dar?`;
-
+const crearProgreso = async (req, res) => {
   try {
-    const response = await openai.completions.create({
-      model: 'text-davinci-003', 
-      prompt: prompt,
-      max_tokens: 150,
-    });
-    
-    // Responder al frontend con las recomendaciones de IA
-    res.json({ recomendaciones: response.choices[0].text.trim() });
+    const nuevoProgreso = await progresoModel.registrarProgreso(req.body);
+    res.status(201).json(nuevoProgreso);
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener recomendaciones' });
+    console.error(error);
+    res.status(500).json({ mensaje: 'Error al crear el progreso' });
   }
 };
 
-// listar el progreso por usuario
-export const listarPorUsuario = (req, res) => {
-  // lógica para obtener el progreso desde la base de datos
-  res.json({ mensaje: 'Progreso del usuario' });
+const listarProgresosPorUsuario = async (req, res) => {
+  const { id_usuarios } = req.params;
+  try {
+    const progresos = await progresoModel.listarProgresoPorUsuario(id_usuarios);
+    res.json(progresos);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: 'Error al obtener progresos' });
+  }
 };
 
-// Función para registrar el progreso
-export const registrar = (req, res) => {
-  // lógica para guardar el progreso en la base de datos
-  res.json({ mensaje: 'Progreso registrado correctamente' });
+// (Opcional) Obtener un solo progreso por ID
+const obtenerProgresoPorId = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await progresoModel.obtenerProgresoPorId(id);
+    if (result) {
+      res.json(result);
+    } else {
+      res.status(404).json({ mensaje: 'Progreso no encontrado' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: 'Error al obtener el progreso' });
+  }
+};
+
+export default {
+  crearProgreso,
+  listarProgresosPorUsuario,
+  obtenerProgresoPorId
 };

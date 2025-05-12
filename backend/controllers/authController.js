@@ -1,38 +1,70 @@
+// authController.js
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
+import usuarioModel from '../models/usuarioModel.js';
 
 dotenv.config();
 
-// Generación del token en el login
-export const login = (req, res) => {
-  const { email, password } = req.body;
+const authController = {
+  // Función para iniciar sesión
+  login: async (req, res) => {
+    const { email, password } = req.body;
 
 
-  const usuario = { id: 1 };  
+    try {
+      // Buscar al usuario por correo electrónico
+      const usuario = await usuarioModel.obtenerPorEmail(email);
+      if (!usuario) {
+        return res.status(401).json({ mensaje: 'Credenciales incorrectas' });
+      }
 
-  // Generar un token con la duración de 21 días
-  const token = jwt.sign({ id: usuario.id }, process.env.SECRET_KEY, { expiresIn: '21d' });
+      // Comparar la contraseña proporcionada con la almacenada en la base de datos
+      const esContrasenaCorrecta = await bcrypt.compare(password, usuario.contrasena);
+      if (!esContrasenaCorrecta) {
+        return res.status(401).json({ mensaje: 'Credenciales incorrectas' });
+      }
 
-  res.json({ token });
+      // Generar un token JWT
+      const token = jwt.sign(
+        { id: usuario.id_usuarios, rol: usuario.rol },
+        process.env.JWT_SECRET,
+        { expiresIn: '30d' }
+      );
+
+      // Responder con el token
+      res.json({ mensaje: 'Login exitoso', token });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ mensaje: 'Error al iniciar sesión' });
+    }
+  },
+
+  // Función para renovar el token
+  refreshToken: (req, res) => {
+    const token = req.headers['authorization']?.split(' ')[1];
+
+    if (!token) {
+      return res.status(403).json({ mensaje: 'Token no proporcionado' });
+    }
+
+    try {
+      // Verificar y decodificar el token existente
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      // Generar un nuevo token con la misma información
+      const newToken = jwt.sign(
+        { id: decoded.id, rol: decoded.rol },
+        process.env.JWT_SECRET,
+        { expiresIn: '30d' }
+      );
+
+      res.json({ mensaje: 'Token renovado', token: newToken });
+    } catch (err) {
+      console.error(err);
+      return res.status(403).json({ mensaje: 'Token inválido o expirado' });
+    }
+  }
 };
 
-// Renovar el token
-export const refreshToken = (req, res) => {
-  const token = req.headers['authorization']?.split(' ')[1]; // Obtener el token del header
-
-  if (!token) {
-    return res.status(403).json({ message: 'Token no proporcionado' });
-  }
-
-  try {
-    // Verificar si el token sigue siendo válido
-    const decoded = jwt.verify(token, process.env.SECRET_KEY);
-    
-    // Si el token es válido, generar un nuevo token
-    const newToken = jwt.sign({ id: decoded.id }, process.env.SECRET_KEY, { expiresIn: '31d' });
-
-    res.json({ token: newToken });
-  } catch (err) {
-    return res.status(403).json({ message: 'Token inválido o expirado' });
-  }
-};
+export default authController;

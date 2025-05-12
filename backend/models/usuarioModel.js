@@ -1,61 +1,76 @@
-import pool from '../config/db.js';
+import pool from '../config/db.js'; // AsegÃºrate de tener este archivo configurado
 import bcrypt from 'bcrypt';
 
-// Obtener un usuario por ID
-const obtenerPorId = async (id) => {
-  try {
-    const resultado = await pool.query('SELECT * FROM usuarios WHERE id = $1', [id]);
-    if (resultado.rows.length === 0) {
-      throw new Error('Usuario no encontrado');
-    }
-    return resultado.rows[0];
-  } catch (error) {
-    console.error('Error al obtener el usuario por ID:');
-    throw new Error('Error al obtener el usuario por ID');
+const usuarioModel = {
+  // Crear nuevo usuario con contraseÃ±a encriptada
+crearUsuario: async ({ email, contrasena, nombre, rol, id_plan }) => {
+  const hashedPassword = await bcrypt.hash(contrasena, 10);
+  const query = `
+    INSERT INTO usuarios (nombre, email, contrasena, rol, id_plan)
+    VALUES ($1, $2, $3, $4, $5) RETURNING *
+  `;
+  const values = [nombre, email, hashedPassword, rol, id_plan];
+
+  const { rows } = await pool.query(query, values);
+  return rows[0];
+},
+
+  // Obtener usuario por ID
+  obtenerPorId: async (id) => {
+    const query = 'SELECT * FROM usuarios WHERE id_usuarios = $1';
+    const { rows } = await pool.query(query, [id]);
+    if (rows.length === 0) throw new Error('Usuario no encontrado');
+    return rows[0];
+  },
+
+  // Obtener usuario por email
+  obtenerPorEmail: async (email) => {
+    const query = 'SELECT * FROM usuarios WHERE email = $1';
+    const { rows } = await pool.query(query, [email]);
+    if (rows.length === 0) throw new Error('Usuario no encontrado');
+    return rows[0];
+  },
+
+  // Listar todos los usuarios
+  listarUsuarios: async () => {
+    const query = 'SELECT * FROM usuarios ORDER BY id_usuarios ASC';
+    const { rows } = await pool.query(query);
+    return rows;
+  },
+
+  // Filtrar usuarios por rol
+  filtrarPorRol: async (rol) => {
+    const query = 'SELECT * FROM usuarios WHERE rol = $1';
+    const { rows } = await pool.query(query, [rol]);
+    return rows;
+  },
+
+  // Actualizar usuario (con opciÃ³n de actualizar contraseÃ±a)
+  actualizar: async (id, { nombre, email, contrasena, rol, id_plan }) => {
+  let query = 'UPDATE usuarios SET email = $1, nombre = $2, rol = $3, id_plan = $4';
+  const values = [email, nombre, rol, id_plan];
+
+  if (contrasena) {
+    const hashedPassword = await bcrypt.hash(contrasena, 10);
+    query += `, contrasena = $5 WHERE id_usuarios = $6 RETURNING *`;
+    values.push(hashedPassword, id);
+  } else {
+    query += ` WHERE id_usuarios = $5 RETURNING *`;
+    values.push(id);
+  }
+
+  const { rows } = await pool.query(query, values);
+  return rows[0];
+},
+
+  // Eliminar usuario
+  eliminar: async (id) => {
+    const query = 'DELETE FROM usuarios WHERE id_usuarios = $1';
+    await pool.query(query, [id]);
   }
 };
 
-// Obtener un usuario por email
-const obtenerPorEmail = async (email) => {
-  try {
-    const resultado = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
-    if (resultado.rows.length === 0) {
-      throw new Error('Usuario no encontrado');
-    }
-    return resultado.rows[0];
-  } catch (error) {
-    console.error('Error al obtener el usuario por email:');
-    throw new Error('Error al obtener el usuario por email');
-  }
-};
 
-// Crear un nuevo usuario con contraseña encriptada
-const crear = async (usuario) => {
-  try {
-    const { nombre, email, contrasena, rol } = usuario;
 
-    if (!nombre || !email || !contrasena || !rol) {
-      throw new Error('Faltan datos requeridos para crear el usuario');
-    }
 
-    // Encriptar la contraseña
-    const salt = await bcrypt.genSalt(10);
-    const contrasenaEncriptada = await bcrypt.hash(contrasena, salt);
-
-    // Insertar el usuario en la base de datos
-    const resultado = await pool.query(
-      'INSERT INTO usuarios (nombre, email, contrasena, rol) VALUES ($1, $2, $3, $4) RETURNING *',
-      [nombre, email, contrasenaEncriptada, rol]
-    );
-    return resultado.rows[0];
-  } catch (error) {
-    console.error('Error al crear el usuario:');
-    throw new Error('Error al crear el usuario');
-  }
-};
-
-export default {
-  obtenerPorId,
-  obtenerPorEmail,
-  crear
-};
+export default usuarioModel;

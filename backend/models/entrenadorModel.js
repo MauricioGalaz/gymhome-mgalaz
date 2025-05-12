@@ -1,9 +1,14 @@
-import pool from '../config/db.js'; 
+import pool from '../config/db.js';
 
-const EntrenadorModel = {
-  obtenerTodos: async () => {
-    const res = await pool.query('SELECT * FROM entrenadores');
-    return res.rows;
+const entrenadorModel = {
+  listar: async () => {
+    try {
+      const result = await pool.query('SELECT * FROM entrenadores');
+      return result.rows;
+    } catch (err) {
+      console.error('Error al listar entrenadores:', err.message);
+      throw err;
+    }
   },
 
   crear: async (entrenador) => {
@@ -15,14 +20,18 @@ const EntrenadorModel = {
     return res.rows[0];
   },
 
-  obtenerEntrenadores: async () => {  
-    try {
-      const result = await pool.query('SELECT * FROM entrenadores');
-      return result.rows;
-    } catch (err) {
-      console.error('Error al obtener entrenadores:', err.message);
-      throw err;
-    }
+  obtener: async (id) => {
+    const res = await pool.query('SELECT * FROM entrenadores WHERE id = $1', [id]);
+    return res.rows[0];
+  },
+
+  actualizar: async (id, entrenador) => {
+    const { nombre, especialidad, disponibilidad } = entrenador;
+    const res = await pool.query(
+      'UPDATE entrenadores SET nombre = $1, especialidad = $2, disponibilidad = $3 WHERE id = $4 RETURNING *',
+      [nombre, especialidad, disponibilidad, id]
+    );
+    return res.rows[0];
   },
 
   eliminar: async (id) => {
@@ -30,5 +39,4 @@ const EntrenadorModel = {
   }
 };
 
-export default EntrenadorModel;
-
+export default entrenadorModel;

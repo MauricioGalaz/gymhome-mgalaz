@@ -1,7 +1,7 @@
 import pool from '../config/db.js';
 
 const EjercicioController = {
-  obtenerEjercicios: async (req, res) => {
+  listarEjercicios: async (req, res) => {
     try {
       const resultado = await pool.query('SELECT * FROM ejercicios');
       res.json(resultado.rows);
@@ -29,7 +29,7 @@ const EjercicioController = {
   },
 
   crearEjercicio: async (req, res) => {
-    const { nombre, descripcion, tipo, duracion } = req.body;
+    const { nombre, descripcion } = req.body;
     try {
       const resultado = await pool.query(
         'INSERT INTO ejercicios (nombre, descripcion, tipo, duracion) VALUES ($1, $2, $3, $4) RETURNING *',
@@ -44,7 +44,7 @@ const EjercicioController = {
 
   actualizarEjercicio: async (req, res) => {
     const { id } = req.params;
-    const { nombre, descripcion, tipo, duracion } = req.body;
+    const { nombre, descripcion } = req.body;
     try {
       const resultado = await pool.query(
         'UPDATE ejercicios SET nombre = $1, descripcion = $2, tipo = $3, duracion = $4 WHERE id = $5 RETURNING *',

@@ -1,95 +1,149 @@
-import bcrypt from 'bcrypt';
+import usuarioModel from '../models/usuarioModel.js';
 import jwt from 'jsonwebtoken';
-import UsuarioModel from '../models/usuarioModel.js';
+import bcrypt from 'bcrypt';
 
-const usuarioController = {
-  // Obtener todos los usuarios
-  listarUsuarios: async (req, res) => {
-    try {
-      const usuarios = await UsuarioModel.obtenerTodos();
-      res.json(usuarios);
-    } catch (error) {
-      console.error('Error al listar usuarios:', error.message);
-      res.status(500).json({ mensaje: 'Error al obtener usuarios' });
-    }
-  },
-
-  // Crear un nuevo usuario
+export default {
+  // Crear usuario (usa "contrasena" como nombre del campo)
   crearUsuario: async (req, res) => {
     try {
-      const { nombre, email, contrasena, rol } = req.body;
+      const { email, contrasena, nombre, rol, id_plan } = req.body;
 
-      if (!nombre || !email || !contrasena || !rol) {
-        return res.status(400).json({ mensaje: 'Todos los campos son obligatorios' });
+      if (!email || !contrasena || !nombre || !rol) {
+        return res.status(400).json({ mensaje: 'Faltan campos obligatorios' });
       }
 
-      // Verificar si ya existe el usuario
-      let usuarioExistente = null;
-      try {
-        usuarioExistente = await UsuarioModel.obtenerPorEmail(email);
-      } catch (error) {
-        
-      }
-
-      if (usuarioExistente) {
-        return res.status(400).json({ mensaje: 'El correo ya está registrado' });
-      }
-
-      // Hashear contraseña
       const hashedPassword = await bcrypt.hash(contrasena, 10);
-
-      // Crear usuario
-      const nuevoUsuario = await UsuarioModel.crear({
-        nombre,
+      const nuevoUsuario = {
         email,
         contrasena: hashedPassword,
-        rol
-      });
+        nombre,
+        rol,
+        id_plan
+      };
 
-      res.status(201).json({
-        mensaje: 'Usuario creado con éxito',
-        usuario: nuevoUsuario
-      });
+      const usuario = await usuarioModel.crearUsuario(nuevoUsuario);
+      res.status(201).json(usuario);
     } catch (error) {
-      console.error('Error en crearUsuario:', error.message);
+      console.error('Error al crear usuario:', error);
       res.status(500).json({ mensaje: 'Error al crear usuario' });
     }
   },
 
-  // Login de usuario
+  // Login (usa "contrasena" en lugar de "password")
   login: async (req, res) => {
     const { email, contrasena } = req.body;
+
+    console.log('Datos recibidos en login:', req.body); // 👉 Depuración
+
+    if (!email || !contrasena) {
+      return res.status(400).json({ mensaje: 'Email y contraseña son obligatorios' });
+    }
+
     try {
-      const usuario = await UsuarioModel.obtenerPorEmail(email);
-      if (!usuario) {
-        return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+      const usuario = await usuarioModel.obtenerPorEmail(email);
+
+      if (!usuario || !usuario.contrasena) {
+        return res.status(401).json({ mensaje: 'Credenciales inválidas' });
       }
 
-      const contrasenaValida = await bcrypt.compare(contrasena, usuario.contrasena);
-      if (!contrasenaValida) {
-        return res.status(401).json({ mensaje: 'Contraseña incorrecta' });
+      const passwordValida = await bcrypt.compare(contrasena, usuario.contrasena);
+      if (!passwordValida) {
+        return res.status(401).json({ mensaje: 'Credenciales inválidas' });
       }
 
       const token = jwt.sign(
-        { id: usuario.id, email: usuario.email, rol: usuario.rol },
-        process.env.JWT_SECRET,
-        { expiresIn: '21d' }
+        { id: usuario.id_usuarios, rol: usuario.rol },
+        process.env.JWT_SECRET || 'secreto',
+        { expiresIn: '1d' }
       );
 
       res.json({
+        mensaje: 'Login exitoso',
         token,
         usuario: {
-          id: usuario.id,
+          id: usuario.id_usuarios,
           nombre: usuario.nombre,
           email: usuario.email,
           rol: usuario.rol
         }
       });
     } catch (error) {
-      console.error('Error en login:', error.message);
+      console.error('Error al iniciar sesión:', error);
       res.status(500).json({ mensaje: 'Error al iniciar sesión' });
+    }
+  },
+
+  // Otros métodos...
+  listarUsuarios: async (req, res) => {
+    try {
+      const usuarios = await usuarioModel.listarUsuarios();
+      res.json(usuarios);
+    } catch (error) {
+      res.status(500).json({ mensaje: 'Error al obtener usuarios' });
+    }
+  },
+
+  obtenerPorId: async (req, res) => {
+    try {
+      const usuario = await usuarioModel.obtenerPorId(req.params.id);
+      res.json(usuario);
+    } catch (error) {
+      res.status(500).json({ mensaje: 'Error al obtener usuario' });
+    }
+  },
+
+  obtenerPorEmail: async (req, res) => {
+    try {
+      const usuario = await usuarioModel.obtenerPorEmail(req.params.email);
+      res.json(usuario);
+    } catch (error) {
+      res.status(500).json({ mensaje: 'Error al obtener usuario' });
+    }
+  },
+  obtenerUsuarios: async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id_usuarios, nombre FROM usuarios');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error al obtener usuarios:', error.message);
+    res.status(500).json({ mensaje: 'Error al obtener usuarios' });
+  }
+},
+listarNombres: async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id_usuarios, nombre FROM usuarios');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error al listar usuarios:', error.message);
+    res.status(500).json({ mensaje: 'Error al obtener usuarios' });
+  }
+},
+
+
+  filtrarPorRol: async (req, res) => {
+    try {
+      const usuarios = await usuarioModel.filtrarPorRol(req.params.rol);
+      res.json(usuarios);
+    } catch (error) {
+      res.status(500).json({ mensaje: 'Error al filtrar usuarios' });
+    }
+  },
+
+  actualizar: async (req, res) => {
+    try {
+      const usuarioActualizado = await usuarioModel.actualizar(req.params.id, req.body);
+      res.json({ mensaje: 'Usuario actualizado', usuario: usuarioActualizado });
+    } catch (error) {
+      res.status(500).json({ mensaje: 'Error al actualizar usuario' });
+    }
+  },
+
+  eliminar: async (req, res) => {
+    try {
+      await usuarioModel.eliminar(req.params.id);
+      res.json({ mensaje: 'Usuario eliminado correctamente' });
+    } catch (error) {
+      res.status(500).json({ mensaje: 'Error al eliminar usuario' });
     }
   }
 };
-
-export default usuarioController;

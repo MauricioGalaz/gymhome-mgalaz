@@ -1,22 +1,41 @@
-const pool = require('../config/db')
+// backend/models/progresoModel.js
+import { Pool } from 'pg';
 
-const ProgresoModel = {
-  obtenerPorUsuario: async (usuario_id) => {
-    const res = await pool.query(
-      'SELECT * FROM "progresousuario" WHERE usuario_id = $1 ORDER BY fecha DESC',
-      [usuario_id]
-    )
-    return res.rows
-  },
+// Configuración de la conexión con la base de datos
+const pool = new Pool({
+  user: 'postgres',
+  host: 'localhost',
+  database: 'gymhomedb',
+  password: 'Mito011078',
+  port: 5432
+});
 
-  crear: async ({ usuario_id, plan_id, avance, fecha }) => {
-    const res = await pool.query(
-      `INSERT INTO "progresousuario" (usuario_id, plan_id, avance, fecha)
-       VALUES ($1, $2, $3, $4) RETURNING *`,
-      [usuario_id, plan_id, avance, fecha]
-    )
-    return res.rows[0]
-  }
-}
+// Función para obtener progreso por usuario
+const listarProgresoPorUsuario = async (usuarioId) => {
+  const result = await pool.query(
+    'SELECT id_progreso, id_usuarios, id_planes, avance, fecha FROM progresousuario WHERE id_usuarios = $1', 
+    [usuarioId]
+  );
+  return result.rows;
+};
 
-module.exports = ProgresoModel
+// Función para registrar un nuevo progreso
+const registrarProgreso = async (progreso) => {
+  const { id_usuarios, id_planes, avance, fecha } = progreso;
+  const result = await pool.query(
+    'INSERT INTO progresousuario (id_usuarios, id_planes, avance, fecha) VALUES ($1, $2, $3, $4) RETURNING *',
+    [id_usuarios, id_planes, avance, fecha]
+  );
+  return result.rows[0];
+};
+
+const obtenerProgresoPorId = async (id) => {
+  const result = await pool.query(
+    'SELECT id_progreso, id_usuarios, id_planes, avance, fecha FROM progresousuario WHERE id_progreso = $1',
+    [id]
+  );
+  return result.rows[0];
+};
+
+// Exportación por defecto
+export default { listarProgresoPorUsuario, registrarProgreso, obtenerProgresoPorId };

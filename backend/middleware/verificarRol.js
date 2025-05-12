@@ -1,11 +1,8 @@
-export const verificarRol = (rolRequerido) => {
+export const verificarRol = (rolesPermitidos = []) => {
   return (req, res, next) => {
-    const { rol } = req.usuario;
-
-    if (rol !== rolRequerido) {
-      return res.status(403).json({ mensaje: 'Acceso denegado. No tienes el rol adecuado.' });
+    if (!rolesPermitidos.includes(req.usuario.rol)) {
+      return res.status(403).json({ mensaje: 'Acceso denegado: rol no autorizado' });
     }
-
     next();
   };
 };

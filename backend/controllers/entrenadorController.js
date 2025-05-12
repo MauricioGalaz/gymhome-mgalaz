@@ -1,10 +1,9 @@
-import EntrenadorModel from '../models/entrenadorModel.js';
+import entrenadorModel from '../models/entrenadorModel.js';
 
-const EntrenadorController = {
-  // Listar todos los entrenadores
+const entrenadorController = {
   listar: async (req, res) => {
     try {
-      const entrenadores = await EntrenadorModel.obtenerTodos();
+      const entrenadores = await entrenadorModel.listar();
       res.json(entrenadores);
     } catch (error) {
       console.error(error);
@@ -12,33 +11,51 @@ const EntrenadorController = {
     }
   },
 
-  // Crear un nuevo entrenador
-  crear: async (req, res) => {
+  obtener: async (req, res) => {
+    const { id } = req.params;
     try {
-      const nuevo = await EntrenadorModel.crear(req.body);
-      res.status(201).json(nuevo);
+      const entrenador = await entrenadorModel.obtener(id);
+      if (entrenador) {
+        res.json(entrenador);
+      } else {
+        res.status(404).json({ mensaje: 'Entrenador no encontrado' });
+      }
+    } catch (error) {
+      res.status(500).json({ mensaje: 'Error al obtener entrenador' });
+    }
+  },
+
+  crear: async (req, res) => {
+    const { nombre, especialidad, disponibilidad } = req.body;
+    try {
+      const nuevoEntrenador = await entrenadorModel.crear({ nombre, especialidad, disponibilidad });
+      res.status(201).json(nuevoEntrenador);
     } catch (error) {
       console.error(error);
       res.status(500).json({ mensaje: 'Error al crear entrenador' });
     }
   },
 
-  // Obtener un entrenador por ID
-  obtener: async (req, res) => {
+  actualizar: async (req, res) => {
+    const { id } = req.params;
+    const { nombre, especialidad, disponibilidad } = req.body;
     try {
-      const entrenador = await EntrenadorModel.obtenerPorId(req.params.id);
-      if (!entrenador) {
-        return res.status(404).json({ mensaje: 'Entrenador no encontrado' });
+      const entrenadorActualizado = await entrenadorModel.actualizar(id, { nombre, especialidad, disponibilidad });
+      if (entrenadorActualizado) {
+        res.json(entrenadorActualizado);
+      } else {
+        res.status(404).json({ mensaje: 'Entrenador no encontrado' });
       }
       res.json(entrenador);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ mensaje: 'Error al buscar entrenador' });
+      res.status(500).json({ mensaje: 'Error al actualizar entrenador' });
     }
   },
 
   // Eliminar un entrenador
   eliminar: async (req, res) => {
+    const { id } = req.params;
     try {
       await EntrenadorModel.eliminar(req.params.id);
       res.json({ mensaje: 'Entrenador eliminado' });
@@ -49,4 +66,4 @@ const EntrenadorController = {
   }
 };
 
-export default EntrenadorController;
+export default entrenadorController;

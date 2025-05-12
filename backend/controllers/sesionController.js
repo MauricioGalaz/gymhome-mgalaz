@@ -1,34 +1,33 @@
-import SesionModel from '../models/sesionModel.js';
+import sesionModel from '../models/sesionModel.js';
 
-const SesionController = {
-  // obtener sesiones por usuario
+const sesionController = {
   listarPorUsuario: async (req, res) => {
+    const { id_usuarios } = req.params;
     try {
-      const sesiones = await SesionModel.obtenerPorUsuario(req.params.usuario_id);
-      res.json(sesiones); // Devolver sesiones encontradas
+      const sesiones = await sesionModel.obtenerPorUsuario(id_usuarios);
+      res.json(sesiones);
     } catch (error) {
       console.error(error);
       res.status(500).json({ mensaje: 'Error al obtener sesiones' });
     }
   },
 
-  // crear una nueva sesión
   crear: async (req, res) => {
     try {
-      const nuevaSesion = await SesionModel.crear(req.body);
-      res.status(201).json(nuevaSesion); // Devolver la sesión creada
+      const nuevaSesion = await sesionModel.crear(req.body);
+      res.status(201).json(nuevaSesion);
     } catch (error) {
       console.error(error);
       res.status(500).json({ mensaje: 'Error al crear sesión' });
     }
   },
 
-  // obtener una sesión por ID
   obtenerPorId: async (req, res) => {
+    const { id } = req.params;
     try {
-      const sesion = await SesionModel.obtenerPorId(req.params.id);
+      const sesion = await sesionModel.obtenerPorId(id);
       if (sesion) {
-        res.json(sesion); // Devolver sesión encontrada
+        res.json(sesion);
       } else {
         res.status(404).json({ mensaje: 'Sesión no encontrada' });
       }
@@ -38,12 +37,12 @@ const SesionController = {
     }
   },
 
-  // actualizar una sesión
   actualizar: async (req, res) => {
+    const { id } = req.params;
     try {
-      const sesionActualizada = await SesionModel.actualizar(req.params.id, req.body);
+      const sesionActualizada = await sesionModel.actualizar(id, req.body);
       if (sesionActualizada) {
-        res.json(sesionActualizada); // Devolver la sesión actualizada
+        res.json(sesionActualizada);
       } else {
         res.status(404).json({ mensaje: 'Sesión no encontrada' });
       }
@@ -53,12 +52,12 @@ const SesionController = {
     }
   },
 
-  // eliminar una sesión
   eliminar: async (req, res) => {
+    const { id } = req.params;
     try {
-      const sesionEliminada = await SesionModel.eliminar(req.params.id);
+      const sesionEliminada = await sesionModel.eliminar(id);
       if (sesionEliminada) {
-        res.json({ mensaje: 'Sesión eliminada correctamente', sesion: sesionEliminada });
+        res.json({ mensaje: 'Sesión eliminada correctamente' });
       } else {
         res.status(404).json({ mensaje: 'Sesión no encontrada' });
       }
@@ -69,4 +68,4 @@ const SesionController = {
   }
 };
 
-export default SesionController;
+export default sesionController;

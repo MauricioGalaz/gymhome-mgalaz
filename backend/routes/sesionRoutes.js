@@ -1,13 +1,9 @@
 import express from 'express';
 import pool from '../config/db.js';
 
-
-
-
-
 const router = express.Router();
 
-// Obtener todas las sesiones con nombres de usuario y entrenador
+// Obtener todas las sesiones
 router.get('/', async (req, res) => {
   try {
     const query = `
@@ -22,15 +18,14 @@ router.get('/', async (req, res) => {
       JOIN entrenadores e ON s.id_entrenadores = e.id_entrenadores
       ORDER BY s.id_sesiones DESC;
     `;
-
     const result = await pool.query(query);
     res.json(result.rows);
   } catch (error) {
-    console.error('Error al obtener sesiones:', error);
     res.status(500).json({ mensaje: 'Error al obtener las sesiones.' });
   }
 });
-// Obtener una sesión por ID
+
+// Obtener sesión por ID
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -53,7 +48,6 @@ router.get('/:id', async (req, res) => {
 
     res.json(result.rows[0]);
   } catch (error) {
-    console.error('Error al obtener sesión:', error);
     res.status(500).send('Error del servidor');
   }
 });
@@ -69,7 +63,6 @@ router.post('/', async (req, res) => {
     );
     res.status(201).send('Sesión creada');
   } catch (error) {
-    console.error('Error al crear sesión:', error);
     res.status(500).send('Error del servidor');
   }
 });
@@ -87,7 +80,6 @@ router.put('/:id', async (req, res) => {
     );
     res.send('Sesión actualizada');
   } catch (error) {
-    console.error('Error al actualizar sesión:', error);
     res.status(500).send('Error del servidor');
   }
 });
@@ -99,10 +91,8 @@ router.delete('/:id', async (req, res) => {
     await pool.query('DELETE FROM sesiones WHERE id_sesiones = $1', [id]);
     res.send('Sesión eliminada');
   } catch (error) {
-    console.error('Error al eliminar sesión:', error);
     res.status(500).send('Error del servidor');
   }
 });
 
-// Exportar la ruta
 export default router;

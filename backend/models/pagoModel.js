@@ -1,21 +1,35 @@
+// models/pagoModel.js
 import pool from '../config/db.js';
 
-const PagoModel = {
-  obtenerPorUsuario: async (usuario_id) => {
+const pagoModel = {
+  obtenerTodos: async () => {
+    const res = await pool.query('SELECT * FROM pagos');
+    return res.rows;
+  },
+
+  obtenerPorUsuario: async (id_usuarios) => {
     const res = await pool.query(
-      'SELECT * FROM "Pagos" WHERE usuario_id = $1',
-      [usuario_id]
+      'SELECT * FROM pagos WHERE id_usuarios = $1',
+      [id_usuarios]
     );
     return res.rows;
   },
 
-  registrar: async ({ usuario_id, monto, fecha, estado }) => {
+  registrar: async ({ id_usuarios, monto, fecha, estado }) => {
     const res = await pool.query(
-      'INSERT INTO "Pagos" (usuario_id, monto, fecha, estado) VALUES ($1, $2, $3, $4) RETURNING *',
-      [usuario_id, monto, fecha, estado]
+      'INSERT INTO pagos (id_usuarios, monto, fecha, estado) VALUES ($1, $2, $3, $4) RETURNING *',
+      [id_usuarios, monto, fecha, estado]
+    );
+    return res.rows[0];
+  },
+
+  actualizarEstado: async (id_pagos, estado) => {
+    const res = await pool.query(
+      'UPDATE pagos SET estado = $1 WHERE id_pagos = $2 RETURNING *',
+      [estado, id_pagos]
     );
     return res.rows[0];
   }
 };
 
-export default PagoModel;
+export default pagoModel;
