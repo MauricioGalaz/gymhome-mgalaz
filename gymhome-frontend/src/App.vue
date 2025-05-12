@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <Sidebar />
+    <Sidebar v-if="isAuthenticated" />
     <main :class="{ 'main-content': isAuthenticated }">
       <router-view />
     </main>

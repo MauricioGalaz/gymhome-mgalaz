@@ -12,74 +12,88 @@
         <input v-model="password" type="password" placeholder="Contraseña (mín. 8)" />
         <input v-model="confirmPassword" type="password" placeholder="Confirmar contraseña" />
         <select v-model="rol">
-          <option value="admin">Administrador</option>
+          <option value="admin">Entrenador-Admin</option>
           <option value="user">Usuario</option>
         </select>
         <button type="submit">Registrarse</button>
       </form>
+      <!-- Mensaje de error o éxito -->
+      <p v-if="mensaje" :class="mensajeClase">{{ mensaje }}</p>
     </div>
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
-import axios from 'axios'
 
-const nombre = ref('')
-const email = ref('')
-const password = ref('')
-const confirmPassword = ref('')
-const rol = ref('user') // valor predeterminado de rol
+<script setup>
+import { ref } from 'vue';
+import axios from 'axios';
+import { useRouter } from 'vue-router';
+
+const nombre = ref('');
+const email = ref('');
+const password = ref('');
+const confirmPassword = ref('');
+const rol = ref('user'); // valor predeterminado de rol
+const mensaje = ref('');
+const mensajeClase = ref('');
+
+const router = useRouter(); // Usamos Vue Router para redirigir después del registro
 
 const handleRegister = async () => {
+  // Validaciones
   if (password.value !== confirmPassword.value) {
-    alert('Las contraseñas no coinciden')
-    return
+    mensaje.value = 'Las contraseñas no coinciden';
+    mensajeClase.value = 'error';
+    return;
   }
 
   if (password.value.length < 8) {
-    alert('La contraseña debe tener al menos 8 caracteres')
-    return
+    mensaje.value = 'La contraseña debe tener al menos 8 caracteres';
+    mensajeClase.value = 'error';
+    return;
   }
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email.value)) {
-    alert('Correo inválido')
-    return
+    mensaje.value = 'Correo inválido';
+    mensajeClase.value = 'error';
+    return;
   }
 
-  if (
-    nombre.value.trim() === '' ||
-    email.value.trim() === '' ||
-    password.value.trim() === ''
-  ) {
-    alert('Todos los campos son obligatorios')
-    return
+  if (nombre.value.trim() === '' || email.value.trim() === '' || password.value.trim() === '') {
+    mensaje.value = 'Todos los campos son obligatorios';
+    mensajeClase.value = 'error';
+    return;
   }
 
+  // Enviar datos al backend
   try {
     const response = await axios.post('http://localhost:3001/api/usuarios/signup', {
       nombre: nombre.value,
       email: email.value,
       password: password.value,
-      rol: rol.value
-    })
+      rol: rol.value,
+    });
 
-    // Guardar el token en localStorage para usarlo en futuras solicitudes
-    localStorage.setItem('token', response.data.token)
-    alert('Registro exitoso')
+    // Guardar el token en localStorage
+    localStorage.setItem('token', response.data.token);
+
+    // Mostrar mensaje de éxito
+    mensaje.value = 'Registro exitoso';
+    mensajeClase.value = 'success';
+
+    // Redirigir al usuario a una página protegida (como el dashboard)
+    router.push('/dashboard');
   } catch (error) {
-    alert('Error al registrarse: ' + (error.response?.data?.mensaje || error.message))
+    mensaje.value = 'Error al registrarse: ' + (error.response?.data?.mensaje || error.message);
+    mensajeClase.value = 'error';
   }
-}
+};
 </script>
 
 <style scoped>
-/* El mismo estilo que ya tienes */
-</style>
 
 
-<style scoped>
 .registro-container {
   background-color: #111827;
   min-height: 100vh;
@@ -139,5 +153,16 @@ form button {
 
 form button:hover {
   background-color: darkgreen;
+}
+
+/* Estilo para el mensaje de éxito y error */
+p.success {
+  color: green;
+  font-weight: bold;
+}
+
+p.error {
+  color: red;
+  font-weight: bold;
 }
 </style>

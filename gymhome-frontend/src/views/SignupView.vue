@@ -32,6 +32,8 @@ const rol = ref('')
 const router = useRouter()
 
 const register = () => {
+  console.log('Register 👉', { nombre: nombre.value, email: email.value, contrasena: contrasena.value, rol: rol.value })
+
   if (contrasena.value !== confirmarContrasena.value) {
     alert('Las contraseñas no coinciden')
     return
@@ -44,21 +46,19 @@ const register = () => {
     rol: rol.value
   }
 
-  fetch('http://localhost:3001/api/usuarios/signup', {
+  fetch('http://localhost:3001/api/usuarios', {            // ← endpoint corregido
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(usuario)
+    body: JSON.stringify(usuario),                         // ← enviamos todo el objeto
   })
     .then(async response => {
-      console.log('🧾 Código de respuesta:', response.status)
-      const data = await response.json().catch(() => ({
-        mensaje: 'Error al interpretar la respuesta del servidor'
-      }))
+      console.log('🧾 Código de respuesta:', response.status, 'ok?', response.ok)
+      const data = await response.json().catch(() => ({ mensaje: 'Error al interpretar la respuesta del servidor' }))
       console.log('📦 Respuesta del servidor:', data)
 
       if (response.ok) {
         alert(data.mensaje || 'Registro exitoso')
-        router.push('/')
+        router.push('/')  
       } else {
         alert('⚠️ Error: ' + (data.mensaje || 'Algo salió mal.'))
       }

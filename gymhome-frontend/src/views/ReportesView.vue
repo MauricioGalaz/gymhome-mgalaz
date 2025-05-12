@@ -1,56 +1,85 @@
 <template>
-  <div class="reportes-container">
-    <h1>Reportes e Indicadores</h1>
-    
-    <div v-if="reportes.length > 0">
-      <div v-for="reporte in reportes" :key="reporte.id" class="reporte-card">
-        <h3>{{ reporte.titulo }}</h3>
-        <p><strong>Fecha:</strong> {{ reporte.fecha }}</p>
-        <p>{{ reporte.descripcion }}</p>
-        <button @click="verReporte(reporte)">Ver Reporte</button>
+  <div class="container mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-4">Reportes de Usuario</h1>
+    <div class="logo-container">
+      <img src="@/assets/logo.png" alt="Logo" class="logo" />
+    </div>
+
+    <div class="bg-white p-4 rounded shadow">
+      <p class="mb-4">Aquí podrás visualizar la evolución de tu estado físico, rutinas y métricas importantes.</p>
+
+      <div class="flex space-x-4 mb-4">
+        <button @click="exportarPDF" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
+          Exportar PDF
+        </button>
+        <button @click="exportarExcel" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+          Exportar Excel
+        </button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+          <thead>
+            <tr>
+              <th class="py-2 px-4 border-b">Fecha</th>
+              <th class="py-2 px-4 border-b">Peso (kg)</th>
+              <th class="py-2 px-4 border-b">IMC</th>
+              <th class="py-2 px-4 border-b">Comentario</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(registro, index) in reportes" :key="index">
+              <td class="py-2 px-4 border-b">{{ registro.fecha }}</td>
+              <td class="py-2 px-4 border-b">{{ registro.peso }}</td>
+              <td class="py-2 px-4 border-b">{{ registro.imc }}</td>
+              <td class="py-2 px-4 border-b">{{ registro.comentario }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
-    <p v-else>Cargando reportes...</p>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { ref } from 'vue'
 
-const reportes = ref([])
+const reportes = ref([
+  { fecha: '2025-04-01', peso: 75, imc: 24.6, comentario: 'Bien' },
+  { fecha: '2025-04-08', peso: 74.5, imc: 24.4, comentario: 'Progreso' }
+])
 
-const token = localStorage.getItem('token')
-
-const api = axios.create({
-  baseURL: 'http://localhost:3001/api',
-  headers: {
-    Authorization: `Bearer ${token}`
-  }
-})
-
-const obtenerReportes = async () => {
-  try {
-    const response = await api.get('/reportes')
-    reportes.value = response.data
-  } catch (error) {
-    console.error('Error al obtener los reportes:', error)
-  }
+const exportarPDF = () => {
+  alert('Funcionalidad de exportar a PDF aún no implementada')
 }
 
-const verReporte = (reporte) => {
-  alert(`Mostrando reporte: ${reporte.titulo}`)
-
+const exportarExcel = () => {
+  alert('Funcionalidad de exportar a Excel aún no implementada')
 }
-
-onMounted(obtenerReportes)
 </script>
+
+<style scoped>
+/* Aquí puedes personalizar aún más */
+</style>
 
 <style scoped>
 .reportes-container {
   padding: 20px;
 }
-
+.logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+h1 {
+  text-align: center;
+  color: #2563eb;
+  margin-bottom: 20px;
+}
+.logo {
+  width: 120px;
+  max-width: 100%;
+}
 .reporte-card {
   background: #fff;
   padding: 20px;
@@ -76,3 +105,4 @@ onMounted(obtenerReportes)
   background-color: #4338ca;
 }
 </style>
+

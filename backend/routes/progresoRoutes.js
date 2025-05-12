@@ -1,11 +1,13 @@
 import express from 'express';
+import progresoController from '../controllers/progresoController.js';
+import { verificarToken } from '../middleware/verificarToken.js';
+
 const router = express.Router();
-import * as progresoController from '../controllers/progresoController.js'; 
 
-// Ruta para listar progreso por usuario
-router.get('/:usuario_id', progresoController.listarPorUsuario);
 
-// Ruta para registrar un nuevo progreso
-router.post('/', progresoController.registrar);
+
+router.post('/progreso', verificarToken, progresoController.crearProgreso);
+router.get('/progreso/:id_usuario', verificarToken, progresoController.listarProgresosPorUsuario);
+router.get('/:id',verificarToken, progresoController.obtenerProgresoPorId); 
 
 export default router;

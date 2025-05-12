@@ -12,24 +12,24 @@
         <thead>
           <tr>
             <th>Nombre</th>
+            <th>descripcion</th>
             <th>Dificultad</th>
             <th>Precio</th>
-            <th>Duración (días)</th>
-            <th>descripcion</th>            
+            <th>Duración (días)</th>        
           </tr>
         </thead>
         <tbody>
-          <tr v-for="plan in planes" :key="plan.id">
+          <tr v-for="plan in planes" :key="planes.id_planes"></tr>
             <td>{{ plan.nombre }}</td>
+            <td>{{ plan.descripcion }}</td>
             <td>{{ plan.dificultad }}</td>
             <td>${{ plan.precio }}</td>
             <td>{{ plan.duracion }}</td>
-            <td>{{ plan.descripcion }}</td>
             <td>
-              <button @click="editarPlan(plan.id)" class="editar-btn">Editar</button>
-              <button @click="eliminarPlan(plan.id)" class="eliminar-btn">Eliminar</button>
+              <button @click="editarPlan(plan.id_planes)" class="editar-btn">Editar</button>
+              <button @click="eliminarPlan(plan.id_planes)" class="eliminar-btn">Eliminar</button>
             </td>
-          </tr>
+          
         </tbody>
       </table>
   
@@ -65,14 +65,14 @@
     router.push('/planes/crear');
   };
   
-  const editarPlan = (id) => {
-    router.push(`/planes/editar/${id}`);
+  const editarPlan = (id_planes) => {
+    router.push(`/planes/editar/${id_planes}`);
   };
   
-  const eliminarPlan = async (id) => {
+  const eliminarPlan = async (id_planes) => {
     if (confirm('¿Estás seguro de que deseas eliminar este plan?')) {
       try {
-        await axios.delete(`http://localhost:3001/api/planes/${id}`);
+        await axios.delete(`http://localhost:3001/api/planes/${id_planes}`);
         alert('Plan eliminado correctamente.');
         obtenerPlanes(); // Recarga la lista
       } catch (error) {
@@ -164,4 +164,3 @@
     background-color: #b91c1c;
   }
   </style>
-  

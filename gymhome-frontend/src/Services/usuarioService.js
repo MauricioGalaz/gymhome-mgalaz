@@ -8,11 +8,13 @@ const usuarioService = {
     try {
       const response = await axios.post(`${apiUrl}/signup`, datosUsuario, {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
       return response.data;
     } catch (error) {
+      console.error('Error al crear usuario:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -27,9 +29,11 @@ const usuarioService = {
       });
       return response.data;
     } catch (error) {
+      console.error('Error al obtener usuarios:', error.response?.data || error.message);
       throw error;
     }
   }
+  
 };
 
 export default usuarioService;

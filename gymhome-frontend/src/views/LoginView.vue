@@ -4,7 +4,7 @@
       <h2>Iniciar Sesión</h2>
       <form @submit.prevent="login">
         <input v-model="email" type="email" placeholder="Correo electrónico" required :disabled="cargando" />
-        <input v-model="contrasena" type="password" placeholder="Contraseña" required :disabled="cargando" />
+        <input v-model="password" type="password" placeholder="Contraseña" required :disabled="cargando" />
         <button type="submit" :disabled="cargando">
           {{ cargando ? 'Ingresando...' : 'Entrar' }}
         </button>
@@ -23,7 +23,7 @@ import { useRouter } from 'vue-router'
 import api from '@/axiosConfig'
 
 const email = ref('')
-const contrasena = ref('')
+const password = ref('') // Mantienes el nombre local
 const cargando = ref(false)
 const error = ref('')
 const router = useRouter()
@@ -38,7 +38,10 @@ const login = async () => {
   cargando.value = true
   error.value = ''
   try {
-    const { data } = await api.post('/usuarios/login', { email: email.value, contrasena: contrasena.value })
+    const { data } = await api.post('/usuarios/login', {
+      email: email.value,
+      contrasena: password.value, // CAMBIO NECESARIO aquí
+    })
     localStorage.setItem('authToken', data.token)
     localStorage.setItem('usuario', JSON.stringify(data.usuario))
     router.push('/dashboard')
@@ -49,6 +52,7 @@ const login = async () => {
   }
 }
 </script>
+
 
 <style scoped>
 .login-container {

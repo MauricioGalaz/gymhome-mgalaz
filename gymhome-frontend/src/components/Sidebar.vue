@@ -46,7 +46,7 @@ const closeSidebar = () => {
 const cerrarSesion = () => {
   localStorage.removeItem('authToken')
   localStorage.removeItem('usuario')
-  router.push('/')
+  router.push('/login') // Redirige a la página de login
 }
 
 const handleResize = () => {
@@ -148,5 +148,16 @@ onBeforeUnmount(() => {
 .sidebar a:hover,
 .sidebar a.router-link-active {
   color: #60a5fa;
+}
+
+@media screen and (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    transform: translateX(-100%);
+  }
+
+  .sidebar.show {
+    transform: translateX(0);
+  }
 }
 </style>

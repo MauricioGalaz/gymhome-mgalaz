@@ -1,93 +1,114 @@
 <template>
-  <div class="dashboard-container">
-    <div class="overlay"></div>
-    <div class="content">
-      <h1>Bienvenido al GymHome Limache</h1>
-      <p>Aquí puedes gestionar tus planes, clases y más.</p>
+    <h1 class="titulo">Bienvenido a GymHome Limache</h1>
+    <div class="dashboard-container">
+    <div class="logo-container">
+      <img src="@/assets/logo.png" alt="Logo" class="logo" />
+    </div>
+    <p class="descripcion">Tu espacio personal para entrenar desde casa con comodidad y control.</p>
+    <div class="dashboard-content">
+      <img src="@/assets/entrenamiento.jpg" alt="Entrenamiento" class="foto-principal" />
 
-      <div class="dashboard-actions">
-        <router-link to="/planes">
-          <button>Ver Planes</button>
-        </router-link>
-        <router-link to="/clases">
-          <button>Ver Clases</button>
-        </router-link>
-        <router-link to="/reportes">
-          <button>Ver Reportes</button>
-        </router-link>
-        <router-link to="/perfil">
-          <button>Perfil</button>
-        </router-link>
-        <router-link to="/pagos">
-          <button>Pagos</button>
-        </router-link>
+      <div class="grafico">
+        <canvas id="myChart"></canvas>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { onMounted, nextTick } from 'vue'
+import Chart from 'chart.js/auto'
 
+
+onMounted(async () => {
+  await nextTick() // Espera a que el canvas esté en el DOM
+  const canvas = document.getElementById('myChart')
+  if (canvas) {
+    const ctx = canvas.getContext('2d')
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'],
+        datasets: [{
+          label: 'Usuarios activos',
+          data: [5, 8, 6, 9, 7],
+          backgroundColor: '#3B82F6'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'top' },
+          title: { display: true, text: 'Actividad semanal' }
+        }
+      }
+    })
+  }
+})
 </script>
 
 <style scoped>
 .dashboard-container {
-  background: linear-gradient(to right, #1e3a8a, #2563eb); 
-  height: 100vh;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  position: relative;
-}
-
-.overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
-}
-
-.content {
-  position: relative;
-  color: white;
+  padding: 2rem;
   text-align: center;
-  max-width: 800px;
-  padding: 40px;
-  background: rgba(0, 0, 0, 0.6);
-  border-radius: 10px;
 }
 
+.btn-add {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+}
 h1 {
-  font-size: 3em;
+  text-align: center;
+  color: #2563eb;
   margin-bottom: 20px;
 }
 
-p {
-  font-size: 1.2em;
-  margin-bottom: 30px;
-}
-
-.dashboard-actions {
+.logo-container {
   display: flex;
-  flex-wrap: wrap;
   justify-content: center;
-  gap: 15px;
+  margin-bottom: 1rem;
 }
 
-button {
-  background-color: #2563eb;
-  color: white;
-  padding: 12px 20px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1.1em;
-  transition: background-color 0.3s ease;
+.logo {
+  width: 120px;
+  max-width: 100%;
 }
 
-button:hover {
-  background-color: #1d4ed8;
+.titulo {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.descripcion {
+  font-size: 1rem;
+  margin-bottom: 2rem;
+  color: #555;
+}
+
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+}
+
+.foto-principal {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.grafico {
+  width: 100%;
+  max-width: 600px;
 }
 </style>

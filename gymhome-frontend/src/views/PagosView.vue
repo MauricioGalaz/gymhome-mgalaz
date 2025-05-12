@@ -1,6 +1,9 @@
 <template>
   <div class="pagos-container">
     <h1>Gestión de Pagos</h1>
+    <div class="logo-container">
+      <img src="@/assets/logo.png" alt="Logo" class="logo" />
+    </div>
 
     <div v-if="pagos.length === 0">
       <p>No hay pagos registrados.</p>
@@ -19,13 +22,13 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="pago in pagos" :key="pago.id">
-            <td>{{ pago.id }}</td>
+          <tr v-for="pago in pagos" :key="id_pagos">
+            <td>{{ pago.id_pagos }}</td>
             <td>{{ pago.usuario_id }}</td>
             <td>${{ pago.monto }}</td>
             <td>{{ new Date(pago.fecha).toLocaleDateString() }}</td>
             <td>{{ pago.estado }}</td>
-            <td><button @click="verPago(pago.id)">Ver Detalles</button></td>
+            <td><button @click="verPago(pago.id)">registrar</button></td>
           </tr>
         </tbody>
       </table>
@@ -71,7 +74,16 @@ h1 {
   color: #2563eb;
   margin-bottom: 20px;
 }
+.logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
 
+.logo {
+  width: 120px;
+  max-width: 100%;
+}
 .pagos-table {
   width: 100%;
   border-collapse: collapse;

@@ -1,58 +1,111 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import LoginView from '../views/LoginView.vue'
-import DashboardView from '../views/DashboardView.vue'
-import PlanesView from '../views/PlanesView.vue'
-import ClasesView from '../views/ClasesView.vue'
-import PerfilView from '../views/PerfilView.vue'
-import SignupView from '../views/SignupView.vue'
-import ReportesView from '../views/ReportesView.vue'
-import PagosView from '../views/PagosView.vue'
+import { createRouter, createWebHistory } from 'vue-router';
+
+import LoginView from '../views/LoginView.vue';
+import SignupView from '../views/SignupView.vue';
+import PlanesView from '../views/PlanesView.vue';
+import EditPlanView from '../views/EditPlanView.vue';
+import ClasesView from '../views/ClasesView.vue';
+import PerfilView from '../views/PerfilView.vue';
+import PagosView from '../views/PagosView.vue';
+import ReportesView from '../views/ReportesView.vue';
+import PlanDetalleView from '../views/PlanDetalleView.vue';
+import DashboardView from '../views/DashboardView.vue';
+import FormularioClase from '../components/FormularioClase.vue';
+
+import { estaAutenticado } from '@/utils/auth';
 
 const routes = [
-  { path: '/', component: LoginView },
-  { path: '/signup', component: SignupView },
-  { path: '/dashboard', component: DashboardView, meta: { requiresAuth: true } },
-  { path: '/planes', component: PlanesView, meta: { requiresAuth: true } },
-  { path: '/clases', component: ClasesView, meta: { requiresAuth: true } },
-  { path: '/perfil', component: PerfilView, meta: { requiresAuth: true } },
-  { path: '/reportes', component: ReportesView, meta: { requiresAuth: true } },
-  { path: '/pagos', component: PagosView, meta: { requiresAuth: true } },
-
+  { path: '/', name: 'Login', component: LoginView },
+  { path: '/signup', name: 'Signup', component: SignupView },
   {
-    path: '/planes/crear',
-    component: () => import('../views/EditPlanView.vue'),
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: DashboardView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/usuarios/:id/escoger-plan',
+    name: 'EscogerPlan',
+    component: () => import('@/views/EscogerPlanView.vue'),
+    meta: { requiresAuth: true },
+    props: true
+  },
+  {
+    path: '/planes',
+    name: 'Planes',
+    component: PlanesView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/planes/:id',
+    name: 'DetallePlan',
+    component: PlanDetalleView,
     meta: { requiresAuth: true }
   },
   {
     path: '/planes/editar/:id',
-    component: () => import('../views/EditPlanView.vue'),
+    name: 'EditarPlan',
+    component: EditPlanView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/clases',
+    name: 'Clases',
+    component: ClasesView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/perfil',
+    name: 'Perfil',
+    component: PerfilView,
     meta: { requiresAuth: true }
   },
   
-]
+  {
+    path: '/pagos',
+    name: 'Pagos',
+    component: PagosView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/reportes',
+    name: 'Reportes',
+    component: ReportesView,
+    meta: { requiresAuth: true }
+  },
+   {
+    path: '/formulario-clase',
+    name: 'FormularioClase',
+    component: FormularioClase
+  },
+  {
+  path: '/clase/nueva',
+  component: () => import('@/views/FormularioClaseView.vue')
+},
+{
+  path: '/clase/:id',
+  component: () => import('@/views/FormularioClaseView.vue')
+}
+
+];
 
 const router = createRouter({
   history: createWebHistory(),
   routes
-})
+});
 
-// Middleware de autenticación
+// Middleware global para autenticaciÃ³n
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('authToken')
-  
-  if (to.meta.requiresAuth && !token) {
-    next('/') // Redirige al login
-  } else if ((to.path === '/' || to.path === '/signup') && token) {
-    next('/dashboard') // Redirige al dashboard si ya está logueado
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+
+  if (requiresAuth && !estaAutenticado()) {
+    next({ name: 'Login' });
+  } else if ((to.name === 'Login' || to.name === 'Signup') && estaAutenticado()) {
+    next({ name: 'Dashboard' });
   } else {
-    next()
+    next();
   }
-})
+});
 
-// Exportamos también la función cerrarSesion
-export function cerrarSesion() {
-  localStorage.removeItem('authToken')
-  localStorage.removeItem('usuario')
-}
+export default router;
 
-export default router

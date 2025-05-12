@@ -1,101 +1,147 @@
 <template>
-  <div class="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-    <div class="bg-white shadow-lg rounded-xl p-8 w-full max-w-lg">
-      <h1 class="text-2xl font-bold text-center mb-6">{{ isEditMode ? 'Editar Plan' : 'Crear Plan' }}</h1>
+  <div>
+    <h2>{{ modoEdicion ? 'Editar Plan' : 'Crear Plan' }}</h2>
 
-      <form @submit.prevent="guardarPlan" class="space-y-5">
-        <div>
-          <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre</label>
-          <input id="nombre" v-model="plan.nombre" class="mt-1 w-full border rounded-md p-2 focus:ring-2 focus:ring-blue-500" required />
-        </div>
+    <form @submit.prevent="modoEdicion ? actualizarPlan() : crearPlan()">
+      <input type="text" v-model="plan.nombre" placeholder="Nombre" required />
+      <input type="text" v-model="plan.descripcion" placeholder="Descripción" required />
+      <input type="number" v-model="plan.precio" placeholder="Precio" required />
+      <input type="text" v-model="plan.dificultad" placeholder="Dificultad" required />
+      <input type="number" v-model="plan.duracion" placeholder="Duración (días)" required />
+      <button type="submit">{{ modoEdicion ? 'Actualizar' : 'Crear' }}</button>
+      <button v-if="modoEdicion" @click="cancelarEdicion" type="button">Cancelar</button>
+    </form>
 
-        <div>
-          <label for="descripcion" class="block text-sm font-medium text-gray-700">Descripción</label>
-          <textarea id="descripcion" v-model="plan.descripcion" class="mt-1 w-full border rounded-md p-2 focus:ring-2 focus:ring-blue-500" required></textarea>
-        </div>
+    <p v-if="mensaje" :style="{ color: exito ? 'green' : 'red' }">{{ mensaje }}</p>
 
-        <div>
-          <label for="dificultad" class="block text-sm font-medium text-gray-700">Dificultad</label>
-          <input id="dificultad" v-model="plan.dificultad" class="mt-1 w-full border rounded-md p-2 focus:ring-2 focus:ring-blue-500" required />
-        </div>
-
-        <div>
-          <label for="precio" class="block text-sm font-medium text-gray-700">Precio</label>
-          <input id="precio" type="number" v-model.number="plan.precio" class="mt-1 w-full border rounded-md p-2 focus:ring-2 focus:ring-blue-500" required min="0" />
-        </div>
-
-        <div>
-          <label for="duracion" class="block text-sm font-medium text-gray-700">Duración</label>
-          <input id="duracion" type="number" v-model.number="plan.duracion" class="mt-1 w-full border rounded-md p-2 focus:ring-2 focus:ring-blue-500" required min="1" />
-        </div>
-
-        <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
-          {{ isEditMode ? 'Actualizar' : 'Crear' }} Plan
-        </button>
-      </form>
-
-      <p v-if="error" class="text-red-500 text-center mt-4">{{ error }}</p>
-      <p v-if="success" class="text-green-500 text-center mt-4">{{ success }}</p>
-    </div>
+    <hr />
+    <h3>Planes Existentes</h3>
+    <ul>
+      <li v-for="p in planes" :key="p.id">
+        {{ p.nombre }} - {{ p.precio }} CLP
+        <button @click="cargarPlan(p)">Editar</button>
+        <button @click="eliminarPlan(p.id)">Eliminar</button>
+      </li>
+    </ul>
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import axios from 'axios';
-
-// Variables reactivas
-const route = useRoute();
-const router = useRouter();
-
-const plan = ref({
-  nombre: '',
-  descripcion: '',
-  dificultad: '',
-  precio: 0,
-  duracion: 0,
-});
-
-const isEditMode = ref(false);
-const error = ref('');
-const success = ref('');
-
-// Definir la URL base de la API
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-
-// Cargar los datos del plan si es en modo edición
-onMounted(async () => {
-  const id = route.params.id;
-  if (id) {
-    isEditMode.value = true;
-    try {
-      const response = await axios.get(`${apiUrl}/api/planes/${id}`);
-      plan.value = response.data;
-    } catch (err) {
-      console.error(err);
-      error.value = 'Error al cargar el plan.';
+<script>
+export default {
+  data() {
+    return {
+      plan: {
+        nombre: '',
+        descripcion: '',
+        precio: 0,
+        dificultad: '',
+        duracion: 0
+      },
+      planes: [],
+      mensaje: '',
+      exito: false,
+      modoEdicion: false,
+      planId: ''
+    };
+  },
+  mounted() {
+    this.listarPlanes();
+  },
+  methods: {
+    async listarPlanes() {
+      try {
+        const res = await fetch('http://localhost:3001/api/planes', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        this.planes = await res.json();
+      } catch (e) {
+        console.error('Error al listar planes:', e);
+      }
+    },
+    async crearPlan() {
+      try {
+        const res = await fetch('http://localhost:3001/api/planes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify(this.plan)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          this.mensaje = '✅ Plan creado';
+          this.exito = true;
+          this.plan = { nombre: '', descripcion: '', precio: 0, dificultad: '', duracion: 0 };
+          this.listarPlanes();
+        } else {
+          this.mensaje = data.mensaje || '❌ Error al crear';
+          this.exito = false;
+        }
+      } catch (e) {
+        this.mensaje = '❌ Error de red';
+        this.exito = false;
+      }
+    },
+    cargarPlan(p) {
+      this.plan = { ...p };
+      this.planId = p.id;
+      this.modoEdicion = true;
+    },
+    async actualizarPlan() {
+      try {
+        const res = await fetch(`http://localhost:3001/api/planes/${this.planId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify(this.plan)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          this.mensaje = '✅ Plan actualizado';
+          this.exito = true;
+          this.cancelarEdicion();
+          this.listarPlanes();
+        } else {
+          this.mensaje = data.mensaje || '❌ Error al actualizar';
+          this.exito = false;
+        }
+      } catch (e) {
+        this.mensaje = '❌ Error de red';
+        this.exito = false;
+      }
+    },
+    cancelarEdicion() {
+      this.modoEdicion = false;
+      this.plan = { nombre: '', descripcion: '', precio: 0, dificultad: '', duracion: 0 };
+      this.planId = '';
+    },
+    async eliminarPlan(id) {
+      if (!confirm('¿Eliminar este plan?')) return;
+      try {
+        const res = await fetch(`http://localhost:3001/api/planes/${id}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (res.ok) {
+          this.mensaje = '✅ Plan eliminado';
+          this.exito = true;
+          this.listarPlanes();
+        } else {
+          this.mensaje = '❌ Error al eliminar';
+          this.exito = false;
+        }
+      } catch (e) {
+        this.mensaje = '❌ Error de red';
+        this.exito = false;
+      }
     }
-  }
-});
-
-// Función para guardar o actualizar el plan
-const guardarPlan = async () => {
-  const method = isEditMode.value ? 'put' : 'post';
-  const url = isEditMode.value
-    ? `${apiUrl}/api/planes/${plan.value.id}`
-    : `${apiUrl}/api/planes`;
-
-  try {
-    // Enviar la solicitud al backend
-    await axios[method](url, { ...plan.value });
-
-    // Mensaje de éxito
-    success.value = `Plan ${isEditMode.value ? 'actualizado' : 'creado'} exitosamente.`;
-    router.push('/planes'); // Redirigir a la lista de planes
-  } catch (err) {
-    console.error(err);
-    error.value = 'Error al guardar el plan.';
   }
 };
 </script>

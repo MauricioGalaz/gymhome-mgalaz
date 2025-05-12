@@ -1,13 +1,9 @@
+// authRoutes.js
 import express from 'express';
-import { login, refreshToken } from '../controllers/authController.js';
-import { verificarToken } from '../middleware/verificarToken.js';
+import authController from '../controllers/authController.js';
 
 const router = express.Router();
 
-// Ruta para hacer login y obtener el token
-router.post('/login', login);
-
-// Ruta para renovar el token
-router.post('/refresh-token', verificarToken, refreshToken);
+router.post('/login', authController.login);
 
 export default router;
