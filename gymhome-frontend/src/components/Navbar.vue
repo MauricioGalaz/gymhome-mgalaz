@@ -7,6 +7,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
+import { logout } from '@/utils/auth' // ✅ Importa la función correcta
 
 const router = useRouter()
 
@@ -15,8 +16,8 @@ function irDashboard() {
 }
 
 function cerrarSesion() {
-  localStorage.removeItem('token')
-  router.push('/')
+  logout()                // ✅ Borra token y usuario del localStorage
+  router.push('/')        // ✅ Redirige al login
 }
 </script>
 
