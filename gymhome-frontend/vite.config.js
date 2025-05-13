@@ -11,12 +11,10 @@ export default defineConfig({
     }
   },
   server: {
-    port: 5174,  // puerto fronted
+    // Este bloque solo se aplica en desarrollo local
+    port: 5174,  // Puerto para el frontend en desarrollo
     proxy: {
-      '/api': 'http://localhost:3001',
-    },
-    allowedHosts: ['localhost'],
-  },
+      '/api': 'http://localhost:3001'
+    }
+  }
 })
-
-
