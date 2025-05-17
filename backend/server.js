@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 dotenv.config();
 
-// Inicializar app (debe ir aquí arriba)
+
 const app = express();
 
 // Importación de rutas
@@ -12,7 +12,7 @@ import authRoutes from './routes/authRoutes.js';
 import usuarioRoutes from './routes/usuarioRoutes.js';
 import planRoutes from './routes/planRoutes.js';
 import pagoRoutes from './routes/pagoRoutes.js';
-import sesionesRoutes from './routes/sesionRoutes.js';  // Esta es la ruta correcta
+import sesionesRoutes from './routes/sesionRoutes.js';  
 import progresoRoutes from './routes/progresoRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import recomendacionRoutes from './routes/recomendacionRoutes.js';
@@ -31,12 +31,14 @@ app.use('/api/auth', authRoutes);
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/planes', planRoutes);
 app.use('/api/pagos', pagoRoutes);
-app.use('/api/sesiones', sesionesRoutes);  // Asegúrate de usar la ruta correcta
+app.use('/api/sesiones', sesionesRoutes);  
 app.use('/api/progresos', progresoRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/recomendaciones', recomendacionRoutes);
 app.use('/api/ejercicios', ejercicioRoutes);
 app.use('/api/entrenadores', entrenadorRoutes);
+app.use('/uploads', express.static('uploads'));
+
 
 // Manejo de errores
 app.use((err, req, res, next) => {

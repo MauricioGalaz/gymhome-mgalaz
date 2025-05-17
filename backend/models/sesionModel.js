@@ -1,4 +1,4 @@
-import pool from '../config/db.js'; // Asegúrate de tener configurado tu pool de conexión
+import pool from '../config/db.js'; 
 
 const sesionModel = {
   obtenerPorUsuario: async (id_usuario) => {

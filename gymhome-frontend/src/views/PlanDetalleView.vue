@@ -6,7 +6,7 @@
     <p v-if="plan.precio">Precio: ${{ plan.precio }}</p>
     <p v-if="plan.duracion">Duración: {{ plan.duracion }}</p>
 
-    <!-- Formulario para editar el plan -->
+    
     <div v-if="esEntrenador">
       <h2>Editar Plan</h2>
       <form @submit.prevent="actualizarPlan">
@@ -34,7 +34,7 @@
       </form>
     </div>
 
-    <!-- Botón para eliminar el plan -->
+    
     <div v-if="esEntrenador">
       <button @click="eliminarPlan(plan.id_planes)">Eliminar Plan</button>
     </div>
@@ -55,11 +55,11 @@ const plan = ref(null)
 const route = useRoute()
 const router = useRouter()
 
-// Leer rol desde localStorage
+
 const rolUsuario = ref(JSON.parse(localStorage.getItem('usuario'))?.rol || 'usuario')
 const esEntrenador = rolUsuario.value === 'entrenador'
 
-// Función para cargar el plan
+
 const cargarPlan = async () => {
   try {
     const response = await axios.get(`http://localhost:3001/api/planes/${route.params.id}`, {
@@ -71,7 +71,7 @@ const cargarPlan = async () => {
   }
 }
 
-// Función para actualizar el plan
+
 const actualizarPlan = async () => {
   try {
     await axios.put(`http://localhost:3001/api/planes/${plan.value.id_planes}`, plan.value, {
@@ -84,7 +84,7 @@ const actualizarPlan = async () => {
   }
 }
 
-// Eliminar un plan
+
 const eliminarPlan = async id_planes => {
   if (!confirm('¿Eliminar este plan?')) return
   try {
@@ -98,7 +98,7 @@ const eliminarPlan = async id_planes => {
   }
 }
 
-// Cargar el plan cuando se monta el componente
+
 onMounted(cargarPlan)
 </script>
 

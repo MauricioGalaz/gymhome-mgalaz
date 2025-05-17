@@ -37,7 +37,7 @@ import { useRouter } from 'vue-router';
 const clases = ref([]);
 const router = useRouter();
 
-// Función para obtener las clases desde la API
+
 const obtenerClases = async () => {
   try {
     const res = await axios.get('http://localhost:3001/api/clases');
@@ -47,11 +47,11 @@ const obtenerClases = async () => {
   }
 };
 
-// Función para eliminar una clase
+
 const eliminarClase = async (id) => {
   try {
     await axios.delete(`http://localhost:3001/api/clases/${id}`);
-    obtenerClases(); // Actualizar la lista después de eliminar
+    obtenerClases();
   } catch (error) {
     console.error('Error al eliminar la clase:', error);
   }

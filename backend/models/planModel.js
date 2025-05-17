@@ -1,5 +1,5 @@
 import pool from '../config/db.js';
-// console.log('POOL:', pool); // Solo para debug
+
 
 const planModel = {
   obtenerTodos: async () => {

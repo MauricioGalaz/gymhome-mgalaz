@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
 export default {
-  // Crear usuario (usa "contrasena" como nombre del campo)
+  
   crearUsuario: async (req, res) => {
     try {
       const { email, contrasena, nombre, rol, id_plan } = req.body;
@@ -29,11 +29,11 @@ export default {
     }
   },
 
-  // Login (usa "contrasena" en lugar de "password")
+  
   login: async (req, res) => {
     const { email, contrasena } = req.body;
 
-    console.log('Datos recibidos en login:', req.body); // 👉 Depuración
+    console.log('Datos recibidos en login:', req.body); 
 
     if (!email || !contrasena) {
       return res.status(400).json({ mensaje: 'Email y contraseña son obligatorios' });
@@ -73,7 +73,7 @@ export default {
     }
   },
 
-  // Otros métodos...
+ 
   listarUsuarios: async (req, res) => {
     try {
       const usuarios = await usuarioModel.listarUsuarios();
@@ -118,6 +118,14 @@ listarNombres: async (req, res) => {
     res.status(500).json({ mensaje: 'Error al obtener usuarios' });
   }
 },
+  subirFoto: async (req, res) => {
+    const { id } = req.params;
+    const foto = req.file.filename;
+
+    await pool.query('UPDATE usuarios SET foto = $1 WHERE id_usuarios = $2', [foto, id]);
+
+    res.json({ mensaje: 'Imagen actualizada correctamente', foto });
+  },
 
 
   filtrarPorRol: async (req, res) => {
@@ -146,4 +154,4 @@ listarNombres: async (req, res) => {
       res.status(500).json({ mensaje: 'Error al eliminar usuario' });
     }
   }
-};
+ }

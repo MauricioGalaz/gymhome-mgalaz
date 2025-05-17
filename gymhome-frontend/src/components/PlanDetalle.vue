@@ -39,6 +39,6 @@ const cargarPlan = async () => {
 
 onMounted(() => {
   cargarPlan()
-  esEntrenador.value = true // O traerlo desde localStorage o un store
+  esEntrenador.value = true 
 })
 </script>

@@ -11,25 +11,25 @@
   export default {
     data() {
       return {
-        usuarios: [], // Array para almacenar la lista de usuarios
+        usuarios: [], 
       };
     },
     created() {
-      this.obtenerUsuarios(); // Llamar la función para obtener usuarios cuando el componente se carga
+      this.obtenerUsuarios(); 
     },
     methods: {
       obtenerUsuarios() {
-        const token = localStorage.getItem('token'); // Recuperar el token desde localStorage (o sessionStorage)
+        const token = localStorage.getItem('token'); 
   
         fetch('http://localhost:3001/api/usuarios', {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${token}`, // Enviar el token en el encabezado Authorization
+            'Authorization': `Bearer ${token}`, 
           },
         })
           .then((response) => response.json())
           .then((data) => {
-            this.usuarios = data; // Almacenar los usuarios en el estado del componente
+            this.usuarios = data; 
           })
           .catch((error) => {
             console.error('Error:', error);

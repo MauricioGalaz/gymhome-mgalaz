@@ -74,7 +74,7 @@
       try {
         await axios.delete(`http://localhost:3001/api/planes/${id_planes}`);
         alert('Plan eliminado correctamente.');
-        obtenerPlanes(); // Recarga la lista
+        obtenerPlanes();
       } catch (error) {
         console.error('Error al eliminar plan:', error);
         errorMessage.value = 'No se pudo eliminar el plan. Intenta nuevamente.';

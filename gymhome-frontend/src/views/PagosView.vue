@@ -18,17 +18,24 @@
             <th>Monto</th>
             <th>Fecha</th>
             <th>Estado</th>
-            <th>Acción</th>
+            <th v-if="esAdminOEntrenador">Acción</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="pago in pagos" :key="id_pagos">
+          <tr v-for="pago in pagos" :key="pago.id_pagos">
             <td>{{ pago.id_pagos }}</td>
-            <td>{{ pago.usuario_id }}</td>
+            <td>{{ obtenerNombreUsuario(pago.id_usuarios) }}</td>
             <td>${{ pago.monto }}</td>
             <td>{{ new Date(pago.fecha).toLocaleDateString() }}</td>
             <td>{{ pago.estado }}</td>
-            <td><button @click="verPago(pago.id)">registrar</button></td>
+            <td v-if="esAdminOEntrenador">
+              <select v-model="estadoSeleccionado[pago.id_pagos]">
+                <option disabled value="">Seleccionar estado</option>
+                <option value="Pagado">Pagado</option>
+                <option value="Pendiente">Pendiente</option>
+              </select>
+              <button @click="registrarPago(pago.id_pagos)">Registrar</button>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -37,12 +44,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
-import { useRouter } from 'vue-router';
 
 const pagos = ref([]);
-const router = useRouter();
+const usuarios = ref([]);
+const estadoSeleccionado = ref({});
+const rol = ref('admin'); 
 
 const obtenerPagos = async () => {
   try {
@@ -53,13 +61,41 @@ const obtenerPagos = async () => {
   }
 };
 
+const obtenerUsuarios = async () => {
+  try {
+    const response = await axios.get('http://localhost:3001/api/usuarios');
+    usuarios.value = response.data;
+    console.log('Usuarios:', usuarios.value);
+  } catch (error) {
+    console.error('Error al obtener los usuarios:', error);
+  }
+};
+
+const obtenerNombreUsuario = (usuarioId) => {
+  const usuario = usuarios.value.find(user => user.id_usuarios === usuarioId);
+  return usuario ? usuario.nombre : 'Desconocido';
+};
+
+const registrarPago = async (id_pagos) => {
+  try {
+    const estado = estadoSeleccionado.value[id_pagos];
+    if (!estado) {
+      alert('Selecciona un estado antes de registrar.');
+      return;
+    }
+    await axios.patch(`http://localhost:3001/api/pagos/${id_pagos}`, { estado });
+    await obtenerPagos(); 
+  } catch (error) {
+    console.error('Error al registrar el pago:', error);
+  }
+};
+
+const esAdminOEntrenador = computed(() => rol.value === 'admin' || rol.value === 'entrenador');
+
 onMounted(() => {
   obtenerPagos();
+  obtenerUsuarios();
 });
-
-const verPago = (id) => {
-  router.push(`/pago/${id}`);
-};
 </script>
 
 <style scoped>
@@ -74,6 +110,7 @@ h1 {
   color: #2563eb;
   margin-bottom: 20px;
 }
+
 .logo-container {
   display: flex;
   justify-content: center;
@@ -84,13 +121,15 @@ h1 {
   width: 120px;
   max-width: 100%;
 }
+
 .pagos-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
 }
 
-.pagos-table th, .pagos-table td {
+.pagos-table th,
+.pagos-table td {
   padding: 12px;
   border: 1px solid #ddd;
   text-align: left;
@@ -103,6 +142,11 @@ h1 {
 
 .pagos-table td {
   background-color: #f9fafb;
+}
+
+select {
+  padding: 6px;
+  margin-right: 8px;
 }
 
 button {
@@ -119,3 +163,4 @@ button:hover {
   background-color: #1d4ed8;
 }
 </style>
+

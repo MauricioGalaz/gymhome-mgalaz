@@ -77,7 +77,7 @@ const obtenerPlan = async () => {
 onMounted(obtenerPlan);
 
 const validarCampos = () => {
-  errores.value = {}; // reinicia errores
+  errores.value = {}; 
 
   if (!plan.value.nombre.trim()) {
     errores.value.nombre = 'El nombre no puede estar vacío.';

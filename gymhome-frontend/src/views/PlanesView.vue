@@ -33,11 +33,11 @@ import { useRouter } from 'vue-router'
 const planes = ref([])
 const router = useRouter()
 
-// Leer rol desde localStorage
+
 const rolUsuario = ref(JSON.parse(localStorage.getItem('usuario'))?.rol || 'usuario')
 const esEntrenador = rolUsuario.value === 'entrenador'
 
-// Función para obtener todos los planes
+
 const obtenerPlanes = async () => {
   console.log('🔍 Fetching planes…')
   
@@ -58,7 +58,7 @@ const obtenerPlanes = async () => {
   }
 }
 
-// Carga inicial de los planes
+
 onMounted(obtenerPlanes)
 
 // Navegar a la vista de un plan
@@ -66,12 +66,12 @@ const verPlan = id_planes => {
   router.push(`/planes/${id_planes}`)
 }
 
-// Editar un plan
+
 const editarPlan = id_planes => {
   router.push(`/planes/editar/${id_planes}`)
 }
 
-// Eliminar un plan
+
 const eliminarPlan = async id_planes => {
   if (!confirm('¿Estás seguro de que quieres eliminar este plan?')) return
 
@@ -82,7 +82,7 @@ const eliminarPlan = async id_planes => {
 
     if (response.status === 200) {
       alert('Plan eliminado correctamente')
-      obtenerPlanes()  // Refresca la lista de planes
+      obtenerPlanes()  
     }
   } catch (error) {
     console.error('❌ Error al eliminar el plan:', error)

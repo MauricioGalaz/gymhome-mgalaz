@@ -7,7 +7,7 @@
     </div>
 
     <div class="actions">
-      <button class="btn-add" @click="navigateToFormulario">Crear Nueva Sesión</button>
+      <button class="btn-add" @click="abrirModalCrear">Crear Nueva Sesión</button>
       <input v-model="busqueda" placeholder="Buscar..." class="search-input" />
     </div>
 
@@ -34,31 +34,53 @@
           <td>{{ formatearFecha(sesion.fecha) }}</td>
           <td>{{ sesion.duracion }} min</td>
           <td class="actions-column">
-            <button v-if="puedeEditar" @click="editarSesion(sesion.id_sesiones)" class="btn-edit">Editar</button>
+            <button v-if="puedeEditar" @click="abrirModalEditar(sesion)" class="btn-edit">Editar</button>
             <button v-if="puedeEditar" @click="confirmarEliminacion(sesion.id_sesiones)" class="btn-delete">Eliminar</button>
           </td>
         </tr>
       </tbody>
     </table>
+
+    
+    <div v-if="mostrarModal" class="modal">
+      <div class="modal-content">
+        <h2>{{ sesionActual.id_sesiones ? 'Editar Sesión' : 'Crear Sesión' }}</h2>
+
+        <form @submit.prevent="guardarSesion">
+          <label>Usuario:</label>
+          <input v-model="sesionActual.id_usuarios" required placeholder="ID Usuario" />
+
+          <label>Entrenador:</label>
+          <input v-model="sesionActual.id_entrenadores" required placeholder="ID Entrenador" />
+
+          <label>Fecha:</label>
+          <input v-model="sesionActual.fecha" type="datetime-local" required />
+
+          <label>Duración (min):</label>
+          <input v-model="sesionActual.duracion" type="number" required min="1" />
+
+          <div class="modal-actions">
+            <button type="submit" class="btn-add">Guardar</button>
+            <button type="button" class="btn-delete" @click="cerrarModal">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import axios from 'axios';
 
-const router = useRouter();
 const sesiones = ref([]);
 const cargando = ref(true);
 const error = ref(null);
 const busqueda = ref('');
+const mostrarModal = ref(false);
+const sesionActual = ref({ id_usuarios: '', id_entrenadores: '', fecha: '', duracion: '' });
 
-const usuario = ref({
-  nombre: 'Juan Pérez',
-  rol: 'entrenador' // Cambiar dinámicamente según autenticación
-});
-
+const usuario = ref({ nombre: 'Juan Pérez', rol: 'entrenador' }); 
 const puedeEditar = computed(() => usuario.value.rol === 'admin' || usuario.value.rol === 'entrenador');
 
 const sesionesFiltradas = computed(() => {
@@ -71,6 +93,18 @@ const sesionesFiltradas = computed(() => {
     (s.fecha && s.fecha.toLowerCase().includes(termino))
   );
 });
+
+const formatearFecha = (fecha) => {
+  try {
+    const f = new Date(fecha);
+    return f.toLocaleString('es-CL', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+  } catch {
+    return fecha;
+  }
+};
 
 const obtenerSesiones = async () => {
   try {
@@ -85,23 +119,36 @@ const obtenerSesiones = async () => {
   }
 };
 
-const formatearFecha = (fecha) => {
-  try {
-    const f = new Date(fecha);
-    return f.toLocaleString('es-CL', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  } catch {
-    return fecha;
-  }
+const abrirModalCrear = () => {
+  sesionActual.value = { id_usuarios: '', id_entrenadores: '', fecha: '', duracion: '' };
+  mostrarModal.value = true;
 };
 
-const editarSesion = (id) => router.push(`/formulario-clase/${id}`);
-const navigateToFormulario = () => router.push('/formulario-clase');
+const abrirModalEditar = (sesion) => {
+  sesionActual.value = { ...sesion };
+  mostrarModal.value = true;
+};
+
+const cerrarModal = () => {
+  mostrarModal.value = false;
+};
+
+const guardarSesion = async () => {
+  try {
+    if (sesionActual.value.id_sesiones) {
+      // EDITAR
+      await axios.put(`http://localhost:3001/api/sesiones/${sesionActual.value.id_sesiones}`, sesionActual.value);
+    } else {
+      // CREAR
+      await axios.post('http://localhost:3001/api/sesiones', sesionActual.value);
+    }
+    cerrarModal();
+    await obtenerSesiones();
+  } catch (e) {
+    console.error(e);
+    alert('No se pudo guardar la sesión.');
+  }
+};
 
 const confirmarEliminacion = async (id) => {
   if (confirm('¿Está seguro de eliminar esta sesión?')) {
@@ -229,5 +276,43 @@ h1 {
 .no-data {
   background-color: #fef9c3;
   color: #92400e;
+}
+
+
+.modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+}
+
+.modal-content h2 {
+  margin-bottom: 1rem;
+  color: #2563eb;
+  text-align: center;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
 }
 </style>

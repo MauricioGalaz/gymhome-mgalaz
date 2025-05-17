@@ -1,9 +1,8 @@
-// controllers/planController.js
 import pool from '../config/db.js';
 import planModel from '../models/planModel.js';
 
 const planController = {
-  // Listar todos los planes
+ 
   listarPlanes: async (req, res) => {
     try {
       const result = await pool.query('SELECT * FROM planes');
@@ -14,7 +13,7 @@ const planController = {
     }
   },
 
-  // Obtener un plan por ID
+ 
   obtenerPlan: async (req, res) => {
     const { id } = req.params;
     try {
@@ -29,7 +28,7 @@ const planController = {
     }
   },
 
-  // Crear un nuevo plan
+
   crearPlan: async (req, res) => {
     const { nombre, descripcion, dificultad, precio, duracion } = req.body;
     if (!nombre || !descripcion || !dificultad || precio == null || duracion == null) {
@@ -47,9 +46,9 @@ const planController = {
     }
   },
 
-  // Editar un plan existente
+  
   editarPlan: async (req, res) => {
-    const { id } = req.params; // CORREGIDO
+    const { id } = req.params; 
     const { nombre, descripcion, dificultad, precio, duracion } = req.body;
 
     if (!nombre || !descripcion || !dificultad || precio == null || duracion == null) {
@@ -73,7 +72,7 @@ const planController = {
     }
   },
 
-  // Eliminar un plan
+
   eliminarPlan: async (req, res) => {
     const { id } = req.params;
 

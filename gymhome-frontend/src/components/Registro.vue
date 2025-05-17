@@ -17,7 +17,7 @@
         </select>
         <button type="submit">Registrarse</button>
       </form>
-      <!-- Mensaje de error o éxito -->
+      
       <p v-if="mensaje" :class="mensajeClase">{{ mensaje }}</p>
     </div>
   </div>
@@ -33,11 +33,11 @@ const nombre = ref('');
 const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
-const rol = ref('user'); // valor predeterminado de rol
+const rol = ref('user'); 
 const mensaje = ref('');
 const mensajeClase = ref('');
 
-const router = useRouter(); // Usamos Vue Router para redirigir después del registro
+const router = useRouter(); 
 
 const handleRegister = async () => {
   // Validaciones
@@ -75,14 +75,14 @@ const handleRegister = async () => {
       rol: rol.value,
     });
 
-    // Guardar el token en localStorage
+   
     localStorage.setItem('token', response.data.token);
 
-    // Mostrar mensaje de éxito
+    
     mensaje.value = 'Registro exitoso';
     mensajeClase.value = 'success';
 
-    // Redirigir al usuario a una página protegida (como el dashboard)
+   
     router.push('/dashboard');
   } catch (error) {
     mensaje.value = 'Error al registrarse: ' + (error.response?.data?.mensaje || error.message);

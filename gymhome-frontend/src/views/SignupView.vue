@@ -46,10 +46,10 @@ const register = () => {
     rol: rol.value
   }
 
-  fetch('http://localhost:3001/api/usuarios', {            // ← endpoint corregido
+  fetch('http://localhost:3001/api/usuarios', {            
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(usuario),                         // ← enviamos todo el objeto
+    body: JSON.stringify(usuario),                       
   })
     .then(async response => {
       console.log('🧾 Código de respuesta:', response.status, 'ok?', response.ok)

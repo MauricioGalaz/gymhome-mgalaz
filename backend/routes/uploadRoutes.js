@@ -10,7 +10,7 @@ router.post('/imagen', upload.single('imagen'), (req, res) => {
     return res.status(400).json({ mensaje: 'No se subió ningún archivo.' });
   }
 
-  // Validación adicional: extensión del archivo (opcional pero recomendable)
+
   const extensionesPermitidas = ['.png', '.jpg', '.jpeg', '.gif'];
   const extension = path.extname(req.file.originalname).toLowerCase();
   if (!extensionesPermitidas.includes(extension)) {

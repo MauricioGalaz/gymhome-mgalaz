@@ -1,4 +1,3 @@
-<!-- src/views/ProgresoView.vue -->
 <template>
   <div class="progreso">
     <h2>Progreso del Usuario</h2>
@@ -11,16 +10,16 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import api from '@/axiosConfig';  // Asegúrate de que tienes la configuración de axios adecuada
+import api from '@/axiosConfig';  
 
 const route = useRoute();
 const progresos = ref([]);
 
 onMounted(async () => {
-  const id_usuario = route.params.id_usuario;  // Obtiene el id_usuario de la ruta
+  const id_usuario = route.params.id_usuario;
   try {
     const response = await api.get(`/progreso/${id_usuario}`);
-    progresos.value = response.data;  // Almacena los datos de progreso
+    progresos.value = response.data;  
   } catch (error) {
     console.error('Error al cargar el progreso:', error);
   }

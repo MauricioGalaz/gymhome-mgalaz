@@ -1,11 +1,10 @@
-// backend/routes/auth.js
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import pool from '../config/db.js';
 
 const router = express.Router();
 
-// Registro de usuario
+
 router.post('/register', async (req, res) => {
   const { nombre, correo, contraseña } = req.body;
 

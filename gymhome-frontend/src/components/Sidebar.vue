@@ -1,12 +1,11 @@
 <template>
   <div>
-    <!-- Botón hamburguesa móvil -->
     <div v-if="isMobile" class="hamburger" @click="toggleSidebar">☰</div>
 
-    <!-- Fondo oscuro -->
+   
     <div v-if="sidebarVisible && isMobile" class="overlay" @click="closeSidebar"></div>
 
-    <!-- Sidebar -->
+    
     <nav class="sidebar" :class="{ show: sidebarVisible || !isMobile }">
       <div class="logo-section">
         <img src="@/assets/logo.png" alt="Logo" class="logo" />
@@ -46,7 +45,7 @@ const closeSidebar = () => {
 const cerrarSesion = () => {
   localStorage.removeItem('authToken')
   localStorage.removeItem('usuario')
-  router.push('/login') // Redirige a la página de login
+  router.push('/login') 
 }
 
 const handleResize = () => {

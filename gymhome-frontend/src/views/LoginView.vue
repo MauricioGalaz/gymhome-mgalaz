@@ -23,7 +23,7 @@ import { useRouter } from 'vue-router'
 import api from '@/axiosConfig'
 
 const email = ref('')
-const password = ref('') // Mantienes el nombre local
+const password = ref('') 
 const cargando = ref(false)
 const error = ref('')
 const router = useRouter()
@@ -40,7 +40,7 @@ const login = async () => {
   try {
     const { data } = await api.post('/usuarios/login', {
       email: email.value,
-      contrasena: password.value, // CAMBIO NECESARIO aquí
+      contrasena: password.value, 
     })
     localStorage.setItem('authToken', data.token)
     localStorage.setItem('usuario', JSON.stringify(data.usuario))

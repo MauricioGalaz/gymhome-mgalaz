@@ -36,7 +36,7 @@ const obtenerPlanes = async () => {
 }
 
 const escogerPlan = (plan) => {
-  // Aquí podrías guardar en store o emitir evento
+ 
   alert(`Plan seleccionado: ${plan.nombre}`)
 }
 

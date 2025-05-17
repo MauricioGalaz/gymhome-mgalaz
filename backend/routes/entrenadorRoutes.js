@@ -9,7 +9,7 @@ const router = express.Router();
 router.get('/', EntrenadorController.listar);
 router.post('/', EntrenadorController.crear);
 router.get('/:id', EntrenadorController.obtener);
-router.put('/:id', EntrenadorController.actualizar);  // <- Agregada esta ruta
+router.put('/:id', EntrenadorController.actualizar);  
 router.delete('/:id', EntrenadorController.eliminar);
 
 export default router;

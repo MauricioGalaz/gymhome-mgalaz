@@ -1,4 +1,3 @@
-// backend/models/progresoModel.js
 import { Pool } from 'pg';
 
 // Configuración de la conexión con la base de datos
@@ -10,7 +9,7 @@ const pool = new Pool({
   port: 5432
 });
 
-// Función para obtener progreso por usuario
+
 const listarProgresoPorUsuario = async (usuarioId) => {
   const result = await pool.query(
     'SELECT id_progreso, id_usuarios, id_planes, avance, fecha FROM progresousuario WHERE id_usuarios = $1', 
@@ -19,7 +18,7 @@ const listarProgresoPorUsuario = async (usuarioId) => {
   return result.rows;
 };
 
-// Función para registrar un nuevo progreso
+
 const registrarProgreso = async (progreso) => {
   const { id_usuarios, id_planes, avance, fecha } = progreso;
   const result = await pool.query(
@@ -37,5 +36,5 @@ const obtenerProgresoPorId = async (id) => {
   return result.rows[0];
 };
 
-// Exportación por defecto
+
 export default { listarProgresoPorUsuario, registrarProgreso, obtenerProgresoPorId };

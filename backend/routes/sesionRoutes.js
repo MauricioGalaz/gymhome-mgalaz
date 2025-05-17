@@ -3,7 +3,7 @@ import pool from '../config/db.js';
 
 const router = express.Router();
 
-// Obtener todas las sesiones
+
 router.get('/', async (req, res) => {
   try {
     const query = `
@@ -25,7 +25,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Obtener sesión por ID
+
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -52,7 +52,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Crear sesión
+
 router.post('/', async (req, res) => {
   const { id_usuarios, id_entrenadores, fecha, duracion } = req.body;
   try {
@@ -67,7 +67,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Actualizar sesión
+
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
   const { id_usuarios, id_entrenadores, fecha, duracion } = req.body;
@@ -84,7 +84,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Eliminar sesión
+n
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
   try {

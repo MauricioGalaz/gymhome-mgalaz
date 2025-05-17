@@ -1,4 +1,3 @@
-// scripts/crearUsuario.js
 import bcrypt from 'bcrypt';
 import db from '../config/db.js';
 
@@ -6,7 +5,7 @@ const crearUsuario = async () => {
   try {
     const nombre = 'Mauro';
     const email = 'mauro@gmail.com';
-    const contrasena = '12345678'; // Puedes cambiarla
+    const contrasena = '12345678';
     const rol = 'usuario';
 
     const hash = await bcrypt.hash(contrasena, 10);

@@ -1,4 +1,3 @@
-// authController.js
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
@@ -52,7 +51,7 @@ const authController = {
       // Verificar y decodificar el token existente
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      // Generar un nuevo token con la misma información
+     
       const newToken = jwt.sign(
         { id: decoded.id, rol: decoded.rol },
         process.env.JWT_SECRET,

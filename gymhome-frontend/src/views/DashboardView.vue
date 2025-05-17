@@ -1,13 +1,14 @@
 <template>
-    <h1 class="titulo">Bienvenido a GymHome Limache</h1>
-    <div class="dashboard-container">
+  <h1 class="titulo">Bienvenido a GymHome Limache</h1>
+  <div class="dashboard-container">
     <div class="logo-container">
       <img src="@/assets/logo.png" alt="Logo" class="logo" />
     </div>
-    <p class="descripcion">Tu espacio personal para entrenar desde casa con comodidad y control.</p>
+    <p class="descripcion">
+      Tu espacio personal para entrenar desde casa con comodidad y control.
+    </p>
     <div class="dashboard-content">
       <img src="@/assets/entrenamiento.jpg" alt="Entrenamiento" class="foto-principal" />
-
       <div class="grafico">
         <canvas id="myChart"></canvas>
       </div>
@@ -19,9 +20,8 @@
 import { onMounted, nextTick } from 'vue'
 import Chart from 'chart.js/auto'
 
-
 onMounted(async () => {
-  await nextTick() // Espera a que el canvas esté en el DOM
+  await nextTick()
   const canvas = document.getElementById('myChart')
   if (canvas) {
     const ctx = canvas.getContext('2d')
@@ -56,18 +56,10 @@ onMounted(async () => {
   text-align: center;
 }
 
-.btn-add {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-h1 {
-  text-align: center;
+.titulo {
+  font-size: 1.8rem;
   color: #2563eb;
-  margin-bottom: 20px;
+  margin-bottom: 1rem;
 }
 
 .logo-container {
@@ -79,11 +71,6 @@ h1 {
 .logo {
   width: 120px;
   max-width: 100%;
-}
-
-.titulo {
-  font-size: 1.8rem;
-  margin-bottom: 0.5rem;
 }
 
 .descripcion {

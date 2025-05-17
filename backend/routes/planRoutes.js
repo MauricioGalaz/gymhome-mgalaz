@@ -6,10 +6,10 @@ import { verificarRol } from '../middleware/verificarRol.js';
 const router = express.Router();
 
 
-// Listar todos los planes
+
 router.get('/', planController.listarPlanes);
 
-// Obtener un plan por ID
+
 router.get('/:id', planController.obtenerPlan);
 
 // Crear plan (solo admin o entrenador)

@@ -21,7 +21,7 @@ const listarProgresosPorUsuario = async (req, res) => {
   }
 };
 
-// (Opcional) Obtener un solo progreso por ID
+
 const obtenerProgresoPorId = async (req, res) => {
   const { id } = req.params;
   try {

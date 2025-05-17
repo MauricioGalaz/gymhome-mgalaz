@@ -74,7 +74,7 @@ export default {
     const router = useRouter();
     const route = useRoute();
     
-    // Estado
+    
     const sesion = reactive({
       id_usuarios: '',
       id_entrenadores: '',
@@ -87,7 +87,7 @@ export default {
     const cargando = ref(true);
     const error = ref(null);
     
-    // Comprueba si estamos editando o creando
+    
     const id = computed(() => route.params.id);
     const editando = computed(() => !!id.value);
     
@@ -117,7 +117,7 @@ export default {
           const hora = String(fechaObj.getHours()).padStart(2, '0');
           const minutos = String(fechaObj.getMinutes()).padStart(2, '0');
           
-          // Actualizar el objeto sesión con los datos cargados
+          
           Object.assign(sesion, {
             id_usuarios: datosSesion.id_usuarios,
             id_entrenadores: datosSesion.id_entrenadores,
@@ -125,7 +125,7 @@ export default {
             duracion: datosSesion.duracion
           });
         } else {
-          // Si es una nueva sesión, definir fecha predeterminada (ahora + 1 hora)
+         
           const fechaActual = new Date();
           fechaActual.setHours(fechaActual.getHours() + 1);
           
@@ -146,10 +146,10 @@ export default {
       }
     };
     
-    // Guardar la sesión (crear nueva o actualizar existente)
+    
     const guardarSesion = async () => {
       try {
-        // Preparar los datos para enviar
+        
         const datosSesion = {
           id_usuarios: sesion.id_usuarios,
           id_entrenadores: sesion.id_entrenadores,

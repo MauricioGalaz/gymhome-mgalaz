@@ -47,9 +47,9 @@ const userId = route.params.id;
 
 const planes = ref([]);
 const loading = ref(true);
-const planSeleccionado = ref(null); // Guardará el id del plan seleccionado
+const planSeleccionado = ref(null); 
 
-// Verificar si el usuario ya ha escogido un plan
+
 const verificarPlanSeleccionado = async () => {
   try {
     const response = await api.get(`/usuarios/${userId}/plan-seleccionado`);

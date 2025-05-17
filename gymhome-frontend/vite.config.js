@@ -10,9 +10,9 @@ export default defineConfig({
     }
   },
   server: {
-    port: 5174,  // ✅ Puerto fijo
+    port: 5174, 
     proxy: {
-      '/api': 'http://localhost:3001'  // ✅ Redirección a backend
+      '/api': 'http://localhost:3001'  
     }
   }
 })
