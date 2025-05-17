@@ -97,21 +97,21 @@ const router = createRouter({
   routes
 })
 
-// Middleware global para proteger rutas con autenticación
+
 router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
   
-  // Si la ruta requiere autenticación y el usuario no está autenticado
+
   if (requiresAuth && !estaAutenticado()) {
-    next({ name: 'Login' }) // Redirige a Login
+    next({ name: 'Login' })
   } 
-  // Si el usuario está autenticado y está intentando acceder a Login o Signup
+ 
   else if ((to.name === 'Login' || to.name === 'Signup') && estaAutenticado()) {
-    next({ name: 'Dashboard' }) // Redirige al Dashboard
+    next({ name: 'Dashboard' })
   } 
-  // Si la ruta no requiere autenticación o el usuario está autenticado
+  
   else {
-    next() // Deja pasar
+    next() 
   }
 })
 

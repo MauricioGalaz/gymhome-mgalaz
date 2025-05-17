@@ -59,7 +59,7 @@ const exportarExcel = () => {
 </script>
 
 <style scoped>
-/* Aquí puedes personalizar aún más */
+
 </style>
 
 <style scoped>
