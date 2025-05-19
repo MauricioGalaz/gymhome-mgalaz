@@ -1,8 +1,7 @@
-import pool from '../config/db.js'; 
+import pool from '../config/db.js';
 import bcrypt from 'bcrypt';
 
 const usuarioModel = {
-  
   crearUsuario: async ({ email, contrasena, nombre, rol, id_plan }) => {
     const hashedPassword = await bcrypt.hash(contrasena, 10);
     const query = `
@@ -14,7 +13,6 @@ const usuarioModel = {
     return rows[0];
   },
 
- 
   obtenerPorId: async (id) => {
     const query = 'SELECT * FROM usuarios WHERE id_usuarios = $1';
     const { rows } = await pool.query(query, [id]);
@@ -22,7 +20,6 @@ const usuarioModel = {
     return rows[0];
   },
 
-  
   obtenerPorEmail: async (email) => {
     const query = 'SELECT * FROM usuarios WHERE email = $1';
     const { rows } = await pool.query(query, [email]);
@@ -30,13 +27,11 @@ const usuarioModel = {
     return rows[0];
   },
 
- 
   obtenerTodos: async () => {
     const res = await pool.query('SELECT * FROM usuarios');
     return res.rows;
   },
 
- 
   listarUsuarios: async () => {
     const query = 'SELECT * FROM usuarios ORDER BY id_usuarios ASC';
     const { rows } = await pool.query(query);
@@ -49,7 +44,6 @@ const usuarioModel = {
     return rows;
   },
 
-  
   actualizar: async (id, { nombre, email, contrasena, rol, id_plan }) => {
     let query = 'UPDATE usuarios SET email = $1, nombre = $2, rol = $3, id_plan = $4';
     const values = [email, nombre, rol, id_plan];
@@ -67,7 +61,6 @@ const usuarioModel = {
     return rows[0];
   },
 
-  
   eliminar: async (id) => {
     const query = 'DELETE FROM usuarios WHERE id_usuarios = $1';
     await pool.query(query, [id]);

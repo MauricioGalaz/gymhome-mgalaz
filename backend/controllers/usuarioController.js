@@ -1,27 +1,24 @@
 import usuarioModel from '../models/usuarioModel.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import pool from '../config/db.js';
 
 export default {
-  
   crearUsuario: async (req, res) => {
     try {
       const { email, contrasena, nombre, rol, id_plan } = req.body;
-
       if (!email || !contrasena || !nombre || !rol) {
         return res.status(400).json({ mensaje: 'Faltan campos obligatorios' });
       }
 
-      const hashedPassword = await bcrypt.hash(contrasena, 10);
-      const nuevoUsuario = {
+      const usuario = await usuarioModel.crearUsuario({
         email,
-        contrasena: hashedPassword,
+        contrasena,
         nombre,
         rol,
         id_plan
-      };
+      });
 
-      const usuario = await usuarioModel.crearUsuario(nuevoUsuario);
       res.status(201).json(usuario);
     } catch (error) {
       console.error('Error al crear usuario:', error);
@@ -29,11 +26,8 @@ export default {
     }
   },
 
-  
   login: async (req, res) => {
     const { email, contrasena } = req.body;
-
-    console.log('Datos recibidos en login:', req.body); 
 
     if (!email || !contrasena) {
       return res.status(400).json({ mensaje: 'Email y contraseña son obligatorios' });
@@ -41,12 +35,8 @@ export default {
 
     try {
       const usuario = await usuarioModel.obtenerPorEmail(email);
-
-      if (!usuario || !usuario.contrasena) {
-        return res.status(401).json({ mensaje: 'Credenciales inválidas' });
-      }
-
       const passwordValida = await bcrypt.compare(contrasena, usuario.contrasena);
+
       if (!passwordValida) {
         return res.status(401).json({ mensaje: 'Credenciales inválidas' });
       }
@@ -73,7 +63,6 @@ export default {
     }
   },
 
- 
   listarUsuarios: async (req, res) => {
     try {
       const usuarios = await usuarioModel.listarUsuarios();
@@ -100,33 +89,55 @@ export default {
       res.status(500).json({ mensaje: 'Error al obtener usuario' });
     }
   },
+
   obtenerUsuarios: async (req, res) => {
+    try {
+      const result = await pool.query('SELECT id_usuarios, nombre FROM usuarios');
+      res.json(result.rows);
+    } catch (error) {
+      console.error('Error al obtener usuarios:', error.message);
+      res.status(500).json({ mensaje: 'Error al obtener usuarios' });
+    }
+  },
+  obtenerPerfil: async (req, res) => {
   try {
-    const result = await pool.query('SELECT id_usuarios, nombre FROM usuarios');
-    res.json(result.rows);
+    const usuario = await Usuario.findByPk(req.usuario.id); // Suponiendo Sequelize
+    if (!usuario) {
+      return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+    }
+    res.json({ usuario });
   } catch (error) {
-    console.error('Error al obtener usuarios:', error.message);
-    res.status(500).json({ mensaje: 'Error al obtener usuarios' });
+    res.status(500).json({ mensaje: 'Error al obtener perfil', error });
   }
 },
-listarNombres: async (req, res) => {
-  try {
-    const result = await pool.query('SELECT id_usuarios, nombre FROM usuarios');
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Error al listar usuarios:', error.message);
-    res.status(500).json({ mensaje: 'Error al obtener usuarios' });
-  }
-},
-  subirFoto: async (req, res) => {
-    const { id } = req.params;
-    const foto = req.file.filename;
 
-    await pool.query('UPDATE usuarios SET foto = $1 WHERE id_usuarios = $2', [foto, id]);
 
-    res.json({ mensaje: 'Imagen actualizada correctamente', foto });
+  listarNombres: async (req, res) => {
+    try {
+      const result = await pool.query('SELECT id_usuarios, nombre FROM usuarios');
+      res.json(result.rows);
+    } catch (error) {
+      console.error('Error al listar usuarios:', error.message);
+      res.status(500).json({ mensaje: 'Error al obtener usuarios' });
+    }
   },
 
+  subirFoto: async (req, res) => {
+    const { id } = req.params;
+    const foto = req.file?.filename;
+
+    if (!foto) {
+      return res.status(400).json({ mensaje: 'No se proporcionó una imagen' });
+    }
+
+    try {
+      await pool.query('UPDATE usuarios SET foto = $1 WHERE id_usuarios = $2', [foto, id]);
+      res.json({ mensaje: 'Imagen actualizada correctamente', foto });
+    } catch (error) {
+      console.error('Error al subir foto:', error);
+      res.status(500).json({ mensaje: 'Error al subir foto' });
+    }
+  },
 
   filtrarPorRol: async (req, res) => {
     try {
@@ -154,4 +165,4 @@ listarNombres: async (req, res) => {
       res.status(500).json({ mensaje: 'Error al eliminar usuario' });
     }
   }
- }
+};

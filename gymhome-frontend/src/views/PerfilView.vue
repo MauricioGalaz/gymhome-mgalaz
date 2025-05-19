@@ -1,23 +1,18 @@
 <template>
   <div class="perfil-contenedor">
-  
     <div class="perfil-header">
       <h1>Perfil de Usuario</h1>
       <div class="logo-container">
         <img src="@/assets/logo.png" alt="Logo" class="logo" />
       </div>
-      <button v-if="!editando" class="boton-editar" @click="activarEdicion">
-        Editar Perfil
-      </button>
+      <button v-if="!editando" class="boton-editar" @click="activarEdicion">Editar Perfil</button>
     </div>
 
-    
     <div v-if="cargando" class="perfil-contenedor cargando">
       <div class="spinner"></div>
       <p>Cargando datos del perfil...</p>
     </div>
 
-    
     <div v-else-if="error" class="perfil-contenedor error">
       <div class="mensaje-error">
         <i class="icono-error">⚠️</i>
@@ -26,7 +21,6 @@
       </div>
     </div>
 
-   
     <div v-else class="perfil-contenido">
       <div class="perfil-info">
         <!-- Formulario de edición -->
@@ -42,19 +36,16 @@
               <label for="nombre">Nombre completo:</label>
               <input type="text" id="nombre" v-model="datosForm.nombre" required />
             </div>
-
             <div class="campo">
               <label for="email">Correo electrónico:</label>
               <input type="email" id="email" v-model="datosForm.email" required />
             </div>
-
             <div class="campo">
               <label for="telefono">Teléfono:</label>
               <input type="tel" id="telefono" v-model="datosForm.telefono" />
             </div>
-
             <div class="campo">
-              <label for="objetivo">Objetivo de entrenamiento:</label>
+              <label for="objetivo">Objetivo:</label>
               <select id="objetivo" v-model="datosForm.objetivo">
                 <option value="Pérdida de peso">Pérdida de peso</option>
                 <option value="Ganancia muscular">Ganancia muscular</option>
@@ -63,15 +54,13 @@
                 <option value="Rendimiento">Rendimiento deportivo</option>
               </select>
             </div>
-
             <div class="campo">
-              <label for="peso">Peso actual (kg):</label>
-              <input type="number" id="peso" v-model="datosForm.peso" step="0.1" min="20" max="300" />
+              <label for="peso">Peso (kg):</label>
+              <input type="number" id="peso" v-model="datosForm.peso" step="0.1" />
             </div>
-
             <div class="campo">
               <label for="altura">Altura (cm):</label>
-              <input type="number" id="altura" v-model="datosForm.altura" min="100" max="250" />
+              <input type="number" id="altura" v-model="datosForm.altura" />
             </div>
           </div>
 
@@ -81,13 +70,12 @@
           </div>
         </form>
 
-       
+        <!-- Vista solo lectura -->
         <div v-else>
           <div class="usuario-info-principal">
             <div class="imagen-perfil-contenedor">
               <img :src="usuario.imagen_perfil || '/img/default-user.png'" alt="Foto de perfil" class="imagen-perfil" />
             </div>
-
             <div class="detalles-principales">
               <h2>{{ usuario.nombre }}</h2>
               <p><strong>Email:</strong> {{ usuario.email }}</p>
@@ -101,17 +89,14 @@
               <span class="metrica-valor">{{ usuario.peso || 'N/A' }} kg</span>
               <span class="metrica-etiqueta">Peso actual</span>
             </div>
-
             <div class="metrica">
               <span class="metrica-valor">{{ usuario.altura || 'N/A' }} cm</span>
               <span class="metrica-etiqueta">Altura</span>
             </div>
-
             <div class="metrica">
               <span class="metrica-valor">{{ calcularIMC() }}</span>
               <span class="metrica-etiqueta">IMC</span>
             </div>
-
             <div class="metrica">
               <span class="metrica-valor">{{ usuario.objetivo || 'No establecido' }}</span>
               <span class="metrica-etiqueta">Objetivo</span>
@@ -120,24 +105,19 @@
         </div>
       </div>
 
-     
       <div class="perfil-sesiones">
         <h2>Sesiones de Entrenamiento</h2>
-
         <div v-if="cargandoSesiones" class="cargando-sesiones">
           <div class="spinner"></div>
           <p>Cargando sesiones...</p>
         </div>
-
         <div v-else-if="errorSesiones" class="error-sesiones">
           <p>{{ errorSesiones }}</p>
           <button @click="cargarSesiones" class="boton-reintentar">Reintentar</button>
         </div>
-
         <div v-else-if="sesiones.length === 0" class="sin-sesiones">
           <p>No tienes sesiones de entrenamiento registradas.</p>
         </div>
-
         <div v-else class="tabla-sesiones">
           <table>
             <thead>
@@ -165,7 +145,6 @@
       </div>
     </div>
 
-  
     <div v-if="modalSesion" class="modal-sesion">
       <div class="modal-contenido">
         <span class="cerrar-modal" @click="cerrarModalSesion">&times;</span>
@@ -222,19 +201,20 @@ export default {
         const usuarioId = this.obtenerUsuarioId();
         const response = await axios.get(`/api/usuarios/${usuarioId}`);
         this.usuario = response.data;
-        this.datosForm = {
-          nombre: this.usuario.nombre || '',
-          email: this.usuario.email || '',
-          telefono: this.usuario.telefono || '',
-          objetivo: this.usuario.objetivo || '',
-          peso: this.usuario.peso || '',
-          altura: this.usuario.altura || ''
-        };
-        this.cargarSesiones();
+        this.datosForm = { ...this.usuario };
+        await this.cargarSesiones();
       } catch (err) {
         this.error = "No se pudieron cargar los datos del usuario";
       } finally {
         this.cargando = false;
+      }
+    },
+    async cargarEntrenadores() {
+      try {
+        const response = await axios.get('/api/entrenadores');
+        this.entrenadores = response.data;
+      } catch {
+        this.entrenadores = [];
       }
     },
     async cargarSesiones() {
@@ -244,64 +224,56 @@ export default {
         const usuarioId = this.obtenerUsuarioId();
         const response = await axios.get(`/api/sesiones/usuario/${usuarioId}`);
         this.sesiones = response.data;
-      } catch (err) {
+      } catch {
         this.errorSesiones = "No se pudieron cargar las sesiones";
       } finally {
         this.cargandoSesiones = false;
       }
-    },
-    async cargarEntrenadores() {
-      try {
-        const response = await axios.get('/api/entrenadores');
-        this.entrenadores = response.data;
-      } catch (err) {
-        console.error("Error al cargar entrenadores:", err);
-      }
-    },
-    obtenerNombreEntrenador(id) {
-      const entrenador = this.entrenadores.find(e => e.id_entrenadores === id);
-      return entrenador ? entrenador.nombre : 'Desconocido';
-    },
-    formatearFecha(fecha) {
-      const d = new Date(fecha);
-      return d.toLocaleDateString();
-    },
-    calcularIMC() {
-      const peso = parseFloat(this.usuario.peso);
-      const altura = parseFloat(this.usuario.altura) / 100;
-      if (!peso || !altura) return 'N/A';
-      const imc = peso / (altura * altura);
-      return imc.toFixed(1);
     },
     activarEdicion() {
       this.editando = true;
     },
     cancelarEdicion() {
       this.editando = false;
-      this.cargarDatosUsuario();
+      this.datosForm = { ...this.usuario };
     },
     async guardarCambios() {
       try {
         const usuarioId = this.obtenerUsuarioId();
         await axios.put(`/api/usuarios/${usuarioId}`, this.datosForm);
+        await this.cargarDatosUsuario();
         this.editando = false;
-        this.cargarDatosUsuario();
-      } catch (err) {
-        alert("Error al guardar cambios");
+      } catch (error) {
+        alert("Error al guardar los cambios");
       }
     },
     abrirSelectorImagen() {
       this.$refs.fileInput.click();
     },
-    seleccionarImagen(e) {
-      const archivo = e.target.files[0];
+    seleccionarImagen(event) {
+      const archivo = event.target.files[0];
       if (archivo) {
-        const lector = new FileReader();
-        lector.onload = (ev) => {
-          this.usuario.imagen_perfil = ev.target.result;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.datosForm.imagen_perfil = e.target.result;
         };
-        lector.readAsDataURL(archivo);
+        reader.readAsDataURL(archivo);
       }
+    },
+    formatearFecha(fecha) {
+      return new Date(fecha).toLocaleDateString();
+    },
+    calcularIMC() {
+      const peso = parseFloat(this.usuario.peso);
+      const altura = parseFloat(this.usuario.altura) / 100;
+      if (peso && altura) {
+        return (peso / (altura * altura)).toFixed(1);
+      }
+      return "N/A";
+    },
+    obtenerNombreEntrenador(id) {
+      const entrenador = this.entrenadores.find(e => e.id_entrenadores === id);
+      return entrenador ? entrenador.nombre : 'Desconocido';
     },
     verDetalleSesion(sesion) {
       this.sesionSeleccionada = sesion;
@@ -312,7 +284,6 @@ export default {
     }
   }
 };
-
 </script>
 
 <style scoped>

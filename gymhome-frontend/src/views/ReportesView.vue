@@ -75,8 +75,8 @@ onMounted(async () => {
 
   // Carga simulada - reemplaza por llamada API real para traer datos
   reportes.value = [
-    { id_progreso: 1, fecha: '2025-05-18', avance: 'Bueno', id_planes: 101 },
-    { id_progreso: 2, fecha: '2025-05-19', avance: 'Excelente', id_planes: 102 }
+    { id_progreso: 1, fecha: '18-05-2025', avance: 'Bueno', id_planes: 101 },
+    { id_progreso: 2, fecha: '19-05-2025', avance: 'Excelente', id_planes: 102 }
   ]
 })
 

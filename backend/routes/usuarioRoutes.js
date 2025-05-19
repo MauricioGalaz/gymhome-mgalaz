@@ -7,7 +7,7 @@ import upload from '../middleware/upload.js';
 
 const router = express.Router();
 
-// Crear nuevo usuario
+// Crear usuario
 router.post(
   '/',
   [
@@ -22,47 +22,34 @@ router.post(
 // Login
 router.post('/login', usuarioController.login);
 
-// Obtener usuario por email
+// Obtener por email
 router.get('/email/:email', usuarioController.obtenerPorEmail);
 
-// Listar todos los usuarios (sin protección)
-router.get('/todos', usuarioController.obtenerUsuarios);
-
-// Obtener usuario por ID
-router.get('/:id', usuarioController.obtenerPorId);
-
-// Listar usuarios (protegido por token y rol)
-router.get(
-  '/',
-  verificarToken,
-  verificarRol(['admin', 'usuario']),
-  usuarioController.listarUsuarios
-);
-
-// Actualizar usuario (solo admin o entrenador)
-router.put(
-  '/:id',
-  verificarToken,
-  verificarRol(['admin', 'entrenador']),
-  usuarioController.actualizar
-);
-
-// Eliminar usuario (solo admin o entrenador)
-router.delete(
-  '/:id',
-  verificarToken,
-  verificarRol(['admin', 'entrenador']),
-  usuarioController.eliminar
-);
-
-// Listar solo nombres de usuarios
+// Listar nombres
 router.get('/nombres', usuarioController.listarNombres);
 
 // Subir foto de perfil
-router.post(
-  '/subir-foto/:id',
-  upload.single('foto'),
-  usuarioController.subirFoto
-);
+router.post('/subir-foto/:id', upload.single('foto'), usuarioController.subirFoto);
+
+// Obtener todos los usuarios sin protección
+router.get('/todos', usuarioController.obtenerUsuarios);
+
+// Obtener por ID
+router.get('/:id', usuarioController.obtenerPorId);
+
+// Listar protegidos
+router.get('/', verificarToken, verificarRol(['admin', 'usuario']), usuarioController.listarUsuarios);
+
+// Filtrar por rol
+router.get('/rol/:rol', verificarToken, verificarRol(['admin']), usuarioController.filtrarPorRol);
+
+// Actualizar usuario
+router.put('/:id', verificarToken, verificarRol(['admin', 'entrenador']), usuarioController.actualizar);
+
+// Eliminar usuario
+router.delete('/:id', verificarToken, verificarRol(['admin', 'entrenador']), usuarioController.eliminar);
+
+router.get('/perfil', verificarToken, usuarioController.obtenerPerfil);
+
 
 export default router;
