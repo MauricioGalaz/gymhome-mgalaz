@@ -1,7 +1,8 @@
 import pagoModel from '../models/pagoModel.js';
 
 const pagoController = {
-  
+
+  // Obtener todos los pagos con nombre del usuario
   obtenerPagos: async (req, res, next) => {
     try {
       const pagos = await pagoModel.obtenerTodos();
@@ -11,7 +12,7 @@ const pagoController = {
     }
   },
 
- 
+  // Obtener pagos de un usuario específico
   listarPorUsuario: async (req, res, next) => {
     try {
       const { id_usuarios } = req.params;
@@ -22,7 +23,7 @@ const pagoController = {
     }
   },
 
-  
+  // Registrar un nuevo pago
   registrar: async (req, res, next) => {
     try {
       const nuevoPago = await pagoModel.registrar(req.body);
@@ -32,7 +33,7 @@ const pagoController = {
     }
   },
 
-  // Actualizar el estado de un pago
+  // Actualizar estado de un pago
   actualizarEstado: async (req, res, next) => {
     try {
       const { id_pagos } = req.params;

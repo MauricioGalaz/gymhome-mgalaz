@@ -22,19 +22,38 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="pago in pagos" :key="pago.id_pagos">
+          <tr v-for="pago in pagosOrdenados" :key="pago.id_pagos">
             <td>{{ pago.id_pagos }}</td>
-            <td>{{ obtenerNombreUsuario(pago.id_usuarios) }}</td>
+            <td>{{ pago.nombre_usuario }}</td>
             <td>${{ pago.monto }}</td>
             <td>{{ new Date(pago.fecha).toLocaleDateString() }}</td>
-            <td>{{ pago.estado }}</td>
-            <td v-if="esAdminOEntrenador">
-              <select v-model="estadoSeleccionado[pago.id_pagos]">
+            <td>
+              <span v-if="!editando[pago.id_pagos]">
+                {{ pago.estado }}
+                <span v-if="pago.estado === 'Pagado'" class="icono-verde">✅</span>
+              </span>
+
+              <select v-if="editando[pago.id_pagos]" v-model="estadoSeleccionado[pago.id_pagos]">
                 <option disabled value="">Seleccionar estado</option>
                 <option value="Pagado">Pagado</option>
                 <option value="Pendiente">Pendiente</option>
               </select>
-              <button @click="registrarPago(pago.id_pagos)">Registrar</button>
+            </td>
+
+            <td v-if="esAdminOEntrenador">
+              <button
+                v-if="!editando[pago.id_pagos] && pago.estado !== 'Pagado'"
+                @click="activarEdicion(pago.id_pagos)"
+              >
+                Registrar
+              </button>
+
+              <button
+                v-else-if="editando[pago.id_pagos]"
+                @click="guardarEstado(pago.id_pagos)"
+              >
+                Guardar
+              </button>
             </td>
           </tr>
         </tbody>
@@ -48,10 +67,11 @@ import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 
 const pagos = ref([]);
-const usuarios = ref([]);
 const estadoSeleccionado = ref({});
-const rol = ref('admin'); 
+const editando = ref({});
+const rol = ref('admin'); // Simulado, reemplaza con autenticación real si es necesario
 
+// Función para obtener los pagos desde la API
 const obtenerPagos = async () => {
   try {
     const response = await axios.get('http://localhost:3001/api/pagos');
@@ -61,40 +81,48 @@ const obtenerPagos = async () => {
   }
 };
 
-const obtenerUsuarios = async () => {
-  try {
-    const response = await axios.get('http://localhost:3001/api/usuarios');
-    usuarios.value = response.data;
-    console.log('Usuarios:', usuarios.value);
-  } catch (error) {
-    console.error('Error al obtener los usuarios:', error);
+// Activar el modo edición para una fila
+const activarEdicion = (id_pagos) => {
+  const pago = pagos.value.find(p => p.id_pagos === id_pagos);
+  if (pago && pago.estado !== 'Pagado') {
+    editando.value[id_pagos] = true;
+    estadoSeleccionado.value[id_pagos] = pago.estado;
   }
 };
 
-const obtenerNombreUsuario = (usuarioId) => {
-  const usuario = usuarios.value.find(user => user.id_usuarios === usuarioId);
-  return usuario ? usuario.nombre : 'Desconocido';
-};
-
-const registrarPago = async (id_pagos) => {
+// Guardar el nuevo estado del pago
+const guardarEstado = async (id_pagos) => {
   try {
     const estado = estadoSeleccionado.value[id_pagos];
     if (!estado) {
-      alert('Selecciona un estado antes de registrar.');
+      alert('Selecciona un estado antes de guardar.');
       return;
     }
-    await axios.patch(`http://localhost:3001/api/pagos/${id_pagos}`, { estado });
-    await obtenerPagos(); 
+
+    await axios.put(`http://localhost:3001/api/pagos/estado/${id_pagos}`, { estado });
+
+    await obtenerPagos();
+    editando.value[id_pagos] = false;
+
+    // Desactivar edición permanentemente si es "Pagado"
+    if (estado === 'Pagado') {
+      editando.value[id_pagos] = undefined;
+    }
   } catch (error) {
-    console.error('Error al registrar el pago:', error);
+    console.error('Error al registrar el pago:', error.response || error);
   }
 };
 
+// Mostrar botón solo si el usuario es admin o entrenador
 const esAdminOEntrenador = computed(() => rol.value === 'admin' || rol.value === 'entrenador');
+
+// Ordenar los pagos por ID de menor a mayor
+const pagosOrdenados = computed(() => {
+  return [...pagos.value].sort((a, b) => a.id_pagos - b.id_pagos);
+});
 
 onMounted(() => {
   obtenerPagos();
-  obtenerUsuarios();
 });
 </script>
 
@@ -162,5 +190,9 @@ button {
 button:hover {
   background-color: #1d4ed8;
 }
-</style>
 
+.icono-verde {
+  margin-left: 6px;
+  color: green;
+}
+</style>
