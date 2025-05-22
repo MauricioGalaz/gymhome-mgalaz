@@ -115,4 +115,5 @@ const register = () => {
 .signup-box button:hover {
   background: #4338ca;
 }
+
 </style>

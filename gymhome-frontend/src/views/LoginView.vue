@@ -40,12 +40,19 @@ const login = async () => {
   try {
     const { data } = await api.post('/usuarios/login', {
       email: email.value,
-      contrasena: password.value, 
+      contrasena: password.value,  // correcto según backend
     })
-    localStorage.setItem('authToken', data.token)
-    localStorage.setItem('usuario', JSON.stringify(data.usuario))
-    router.push('/dashboard')
+
+    // Guardar token y usuario en localStorage
+    if (data.token && data.usuario) {
+      localStorage.setItem('authToken', data.token)
+      localStorage.setItem('usuario', JSON.stringify(data.usuario))
+      router.push('/dashboard')
+    } else {
+      error.value = 'Respuesta inválida del servidor.'
+    }
   } catch (err) {
+    console.log('Error en login:', err)
     error.value = err.response?.data?.mensaje || 'Error al iniciar sesión.'
   } finally {
     cargando.value = false
@@ -113,4 +120,5 @@ const login = async () => {
 .signup-link a {
   color: #4f46e5;
 }
+
 </style>

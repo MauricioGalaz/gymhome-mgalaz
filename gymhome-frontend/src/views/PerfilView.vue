@@ -26,7 +26,7 @@
         <!-- Formulario de edición -->
         <form v-if="editando" @submit.prevent="guardarCambios" class="formulario-perfil">
           <div class="imagen-perfil-contenedor">
-            <img :src="usuario.imagen_perfil || '/img/default-user.png'" alt="Foto de perfil" class="imagen-perfil" />
+            <img :src="datosForm.imagen_previsualizacion || usuario.imagen_perfil || '/img/default-user.png'" alt="Foto de perfil" class="imagen-perfil" />
             <button type="button" class="boton-cambiar-imagen" @click="abrirSelectorImagen">Cambiar imagen</button>
             <input type="file" ref="fileInput" style="display: none" @change="seleccionarImagen" accept="image/*" />
           </div>
@@ -180,15 +180,26 @@ export default {
         telefono: '',
         objetivo: '',
         peso: '',
-        altura: ''
+        altura: '',
+        imagen_previsualizacion: '',
+        imagen_perfil: '',
+        imagen_archivo: null
       },
       modalSesion: false,
       sesionSeleccionada: {}
     };
   },
   created() {
-    this.cargarDatosUsuario();
-    this.cargarEntrenadores();
+  const id = this.obtenerUsuarioId();
+  if (!id) {
+    this.$router.push('/login'); // o muestra un mensaje de error
+    return;
+  }
+  this.cargarDatosUsuario();
+  this.cargarEntrenadores();
+},
+  mounted() {
+    this.cargarSesiones();
   },
   methods: {
     obtenerUsuarioId() {
@@ -201,11 +212,21 @@ export default {
         const usuarioId = this.obtenerUsuarioId();
         const response = await axios.get(`/api/usuarios/${usuarioId}`);
         this.usuario = response.data;
-        this.datosForm = { ...this.usuario };
-        await this.cargarSesiones();
+        this.datosForm = {
+          nombre: this.usuario.nombre || '',
+          email: this.usuario.email || '',
+          telefono: this.usuario.telefono || '',
+          objetivo: this.usuario.objetivo || '',
+          peso: this.usuario.peso || '',
+          altura: this.usuario.altura || '',
+          imagen_previsualizacion: '',
+          imagen_perfil: this.usuario.imagen_perfil || '',
+          imagen_archivo: null
+        };
+        this.cargando = false;
+        this.cargarSesiones();
       } catch (err) {
-        this.error = "No se pudieron cargar los datos del usuario";
-      } finally {
+        this.error = err.response?.data?.message || 'No se pudieron cargar los datos del usuario.';
         this.cargando = false;
       }
     },
@@ -213,8 +234,8 @@ export default {
       try {
         const response = await axios.get('/api/entrenadores');
         this.entrenadores = response.data;
-      } catch {
-        this.entrenadores = [];
+      } catch (err) {
+        console.error('Error al cargar entrenadores:', err);
       }
     },
     async cargarSesiones() {
@@ -224,9 +245,9 @@ export default {
         const usuarioId = this.obtenerUsuarioId();
         const response = await axios.get(`/api/sesiones/usuario/${usuarioId}`);
         this.sesiones = response.data;
-      } catch {
-        this.errorSesiones = "No se pudieron cargar las sesiones";
-      } finally {
+        this.cargandoSesiones = false;
+      } catch (error) {
+        this.errorSesiones = 'No se pudieron cargar las sesiones.';
         this.cargandoSesiones = false;
       }
     },
@@ -235,45 +256,75 @@ export default {
     },
     cancelarEdicion() {
       this.editando = false;
-      this.datosForm = { ...this.usuario };
+      this.datosForm = {
+        nombre: this.usuario.nombre || '',
+        email: this.usuario.email || '',
+        telefono: this.usuario.telefono || '',
+        objetivo: this.usuario.objetivo || '',
+        peso: this.usuario.peso || '',
+        altura: this.usuario.altura || '',
+        imagen_previsualizacion: '',
+        imagen_perfil: this.usuario.imagen_perfil || '',
+        imagen_archivo: null
+      };
     },
-    async guardarCambios() {
-      try {
-        const usuarioId = this.obtenerUsuarioId();
-        await axios.put(`/api/usuarios/${usuarioId}`, this.datosForm);
-        await this.cargarDatosUsuario();
-        this.editando = false;
-      } catch (error) {
-        alert("Error al guardar los cambios");
+async guardarCambios() {
+  try {
+    const usuarioId = this.obtenerUsuarioId();
+    const formData = new FormData();
+    formData.append('nombre', this.datosForm.nombre);
+    formData.append('email', this.datosForm.email);
+    formData.append('telefono', this.datosForm.telefono);
+    formData.append('objetivo', this.datosForm.objetivo);
+    formData.append('peso', this.datosForm.peso);
+    formData.append('altura', this.datosForm.altura);
+
+    if (this.datosForm.imagen_archivo) {
+      formData.append('imagen', this.datosForm.imagen_archivo);
+    }
+
+    await axios.put(`/api/usuarios/${usuarioId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${localStorage.getItem('token')}` 
       }
+    });
+
+    this.editando = false;
+    this.cargarDatosUsuario();
+  } catch (error) {
+    alert('Error al guardar los cambios: ' + (error.response?.data?.message || error.message));
+  }
+},
+
+
+    guardarPerfil() {
+      if (!this.usuario.nombre || !this.usuario.email) {
+        alert("Faltan campos obligatorios");
+        return;
+      }
+
+      axios.post('/api/usuario', this.usuario)
+        .then(res => alert("Perfil guardado correctamente"))
+        .catch(err => {
+          console.error(err);
+          alert("No se pudo guardar el perfil. Revisa los datos e intenta de nuevo.");
+        });
     },
     abrirSelectorImagen() {
       this.$refs.fileInput.click();
     },
     seleccionarImagen(event) {
       const archivo = event.target.files[0];
-      if (archivo) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          this.datosForm.imagen_perfil = e.target.result;
-        };
-        reader.readAsDataURL(archivo);
-      }
-    },
-    formatearFecha(fecha) {
-      return new Date(fecha).toLocaleDateString();
-    },
-    calcularIMC() {
-      const peso = parseFloat(this.usuario.peso);
-      const altura = parseFloat(this.usuario.altura) / 100;
-      if (peso && altura) {
-        return (peso / (altura * altura)).toFixed(1);
-      }
-      return "N/A";
-    },
-    obtenerNombreEntrenador(id) {
-      const entrenador = this.entrenadores.find(e => e.id_entrenadores === id);
-      return entrenador ? entrenador.nombre : 'Desconocido';
+      if (!archivo) return;
+
+      this.datosForm.imagen_archivo = archivo;
+
+      const lector = new FileReader();
+      lector.onload = e => {
+        this.datosForm.imagen_previsualizacion = e.target.result;
+      };
+      lector.readAsDataURL(archivo);
     },
     verDetalleSesion(sesion) {
       this.sesionSeleccionada = sesion;
@@ -281,10 +332,30 @@ export default {
     },
     cerrarModalSesion() {
       this.modalSesion = false;
+      this.sesionSeleccionada = {};
+    },
+    formatearFecha(fechaStr) {
+      if (!fechaStr) return '';
+      const fecha = new Date(fechaStr);
+      return fecha.toLocaleDateString();
+    },
+    calcularIMC() {
+      const peso = parseFloat(this.usuario.peso);
+      const alturaCm = parseFloat(this.usuario.altura);
+      if (!peso || !alturaCm) return 'N/A';
+      const alturaM = alturaCm / 100;
+      const imc = peso / (alturaM * alturaM);
+      return imc.toFixed(1);
+    },
+    obtenerNombreEntrenador(id) {
+      const entrenador = this.entrenadores.find(e => e.id_entrenadores === id);
+      return entrenador ? entrenador.nombre : 'Desconocido';
     }
   }
 };
 </script>
+
+
 
 <style scoped>
 .perfil-contenedor {
@@ -631,5 +702,77 @@ export default {
 
 .detalles-sesion p {
   margin: 0.5rem 0;
+}
+/* Responsive */
+@media (max-width: 900px) {
+  .perfil-contenido {
+    flex-direction: column;
+  }
+  .perfil-info, .perfil-sesiones {
+    min-width: 100%;
+  }
+}
+.modal-sesion {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-contenido {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.cerrar-modal {
+  position: absolute;
+  top: 0.75rem;
+  right: 1rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+}
+
+.detalles-sesion p {
+  margin: 0.5rem 0;
+}
+
+/* Spinner genérico */
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #1565c0;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  animation: spin 1s linear infinite;
+  margin: 1rem auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.mensaje-error {
+  text-align: center;
+  color: #c62828;
+}
+
+.icono-error {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 0.5rem;
 }
 </style>

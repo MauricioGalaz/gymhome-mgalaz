@@ -29,6 +29,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 
+
 const router = useRouter()
 const sidebarVisible = ref(false)
 const isMobile = ref(window.innerWidth <= 768)

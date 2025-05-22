@@ -20,6 +20,10 @@ import ejercicioRoutes from './routes/ejercicioRoutes.js';
 import entrenadorRoutes from './routes/entrenadorRoutes.js';
 
 
+
+
+
+
 // Middlewares
 app.use(cors());
 app.use(morgan('dev'));
@@ -38,6 +42,7 @@ app.use('/api/recomendaciones', recomendacionRoutes);
 app.use('/api/ejercicios', ejercicioRoutes);
 app.use('/api/entrenadores', entrenadorRoutes);
 app.use('/uploads', express.static('uploads'));
+app.use('/api/pagos', require('./routes/pagos'));
 
 
 // Manejo de errores

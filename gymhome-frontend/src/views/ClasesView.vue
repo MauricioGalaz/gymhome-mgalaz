@@ -41,7 +41,6 @@
       </tbody>
     </table>
 
-    
     <div v-if="mostrarModal" class="modal">
       <div class="modal-content">
         <h2>{{ sesionActual.id_sesiones ? 'Editar Sesión' : 'Crear Sesión' }}</h2>
@@ -80,8 +79,20 @@ const busqueda = ref('');
 const mostrarModal = ref(false);
 const sesionActual = ref({ id_usuarios: '', id_entrenadores: '', fecha: '', duracion: '' });
 
-const usuario = ref({ nombre: 'Juan Pérez', rol: 'entrenador' }); 
+// Usuario simulado (puedes obtenerlo del token o del store real)
+const usuario = ref({ nombre: 'Juan Pérez', rol: 'entrenador' });
 const puedeEditar = computed(() => usuario.value.rol === 'admin' || usuario.value.rol === 'entrenador');
+
+// Obtener token JWT desde localStorage
+const token = localStorage.getItem('token');
+
+if (!token) {
+  error.value = 'No estás autenticado. Por favor inicia sesión.';
+  cargando.value = false;
+}
+
+// Función para enviar headers con token
+const authHeaders = () => ({ Authorization: `Bearer ${token}` });
 
 const sesionesFiltradas = computed(() => {
   if (!busqueda.value) return sesiones.value;
@@ -108,14 +119,15 @@ const formatearFecha = (fecha) => {
 
 const obtenerSesiones = async () => {
   try {
-    cargando.value = true;
-    const res = await axios.get('http://localhost:3001/api/sesiones');
-    sesiones.value = res.data;
-  } catch (e) {
-    console.error(e);
-    error.value = 'No se pudieron cargar las sesiones. Intente nuevamente.';
-  } finally {
-    cargando.value = false;
+    const response = await axios.get('http://localhost:3001/api/sesiones', {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('authToken')}`
+      }
+      });
+    console.log('Sesiones recibidos:', response.data);
+    sesiones.value = response.data;
+  } catch (error) {
+    console.error('Error al obtener sesiones:', error);
   }
 };
 
@@ -134,13 +146,21 @@ const cerrarModal = () => {
 };
 
 const guardarSesion = async () => {
+  if (!token) {
+    alert('No estás autenticado. Por favor inicia sesión.');
+    return;
+  }
   try {
     if (sesionActual.value.id_sesiones) {
       // EDITAR
-      await axios.put(`http://localhost:3001/api/sesiones/${sesionActual.value.id_sesiones}`, sesionActual.value);
+      await axios.put(`http://localhost:3001/api/sesiones/${sesionActual.value.id_sesiones}`, sesionActual.value, {
+        headers: authHeaders()
+      });
     } else {
       // CREAR
-      await axios.post('http://localhost:3001/api/sesiones', sesionActual.value);
+      await axios.post('http://localhost:3001/api/sesiones', sesionActual.value, {
+        headers: authHeaders()
+      });
     }
     cerrarModal();
     await obtenerSesiones();
@@ -151,9 +171,15 @@ const guardarSesion = async () => {
 };
 
 const confirmarEliminacion = async (id) => {
+  if (!token) {
+    alert('No estás autenticado. Por favor inicia sesión.');
+    return;
+  }
   if (confirm('¿Está seguro de eliminar esta sesión?')) {
     try {
-      await axios.delete(`http://localhost:3001/api/sesiones/${id}`);
+      await axios.delete(`http://localhost:3001/api/sesiones/${id}`, {
+        headers: authHeaders()
+      });
       await obtenerSesiones();
     } catch (e) {
       console.error(e);
@@ -162,7 +188,9 @@ const confirmarEliminacion = async (id) => {
   }
 };
 
-onMounted(obtenerSesiones);
+onMounted(() => {
+  obtenerSesiones();
+});
 </script>
 
 <style scoped>

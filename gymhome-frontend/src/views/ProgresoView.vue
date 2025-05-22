@@ -30,4 +30,5 @@ onMounted(async () => {
 .progreso {
   padding: 20px;
 }
+
 </style>
