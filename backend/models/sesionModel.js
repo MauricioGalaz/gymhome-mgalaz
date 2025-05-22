@@ -1,11 +1,48 @@
-import pool from '../config/db.js'; 
+import pool from '../config/db.js';
 
 const sesionModel = {
-  obtenerPorUsuario: async (id_usuario) => {
-    const query = 'SELECT * FROM sesiones WHERE id_usuarios = $1';
-    const result = await pool.query(query, [id_usuario]);
-    return result.rows;
-  },
+  
+  
+  obtenerTodas: async () => {
+  const query = `
+    SELECT s.*, 
+           u.nombre AS nombre_usuario, 
+           e.nombre AS nombre_entrenador
+    FROM sesiones s
+    JOIN usuarios u ON s.id_usuarios = u.id_usuarios
+    JOIN entrenadores e ON s.id_entrenadores = e.id_entrenadores;
+  `;
+  const result = await pool.query(query);
+  return result.rows;
+},
+
+obtenerPorUsuario: async (id_usuario) => {
+  const query = `
+    SELECT s.*, 
+           u.nombre AS nombre_usuario, 
+           e.nombre AS nombre_entrenador
+    FROM sesiones s
+    JOIN usuarios u ON s.id_usuarios = u.id_usuarios
+    JOIN entrenadores e ON s.id_entrenadores = e.id_entrenadores
+    WHERE s.id_usuarios = $1;
+  `;
+  const result = await pool.query(query, [id_usuario]);
+  return result.rows;
+},
+
+obtenerPorId: async (id) => {
+  const query = `
+    SELECT s.*, 
+           u.nombre AS nombre_usuario, 
+           e.nombre AS nombre_entrenador
+    FROM sesiones s
+    JOIN usuarios u ON s.id_usuarios = u.id_usuarios
+    JOIN entrenadores e ON s.id_entrenadores = e.id_entrenadores
+    WHERE s.id_sesiones = $1;
+  `;
+  const result = await pool.query(query, [id]);
+  return result.rows[0];
+},
 
   crear: async ({ fecha, duracion, id_usuarios, id_entrenadores }) => {
     const query = `
@@ -17,13 +54,7 @@ const sesionModel = {
     return result.rows[0];
   },
 
-  obtenerPorId: async (id) => {
-    const query = 'SELECT * FROM sesiones WHERE id_sesiones = $1';
-    const result = await pool.query(query, [id]);
-    return result.rows[0];
-  },
-
-  actualizar: async (id, { fecha, duracion, id_usuarios, id_entrenadores }) => {
+    actualizar: async (id, { fecha, duracion, id_usuarios, id_entrenadores }) => {
     const query = `
       UPDATE sesiones
       SET fecha = $1,

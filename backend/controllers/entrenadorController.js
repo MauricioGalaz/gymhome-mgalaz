@@ -1,3 +1,4 @@
+// entrenadorController.js
 import entrenadorModel from '../models/entrenadorModel.js';
 
 const entrenadorController = {
@@ -42,23 +43,25 @@ const entrenadorController = {
     try {
       const entrenadorActualizado = await entrenadorModel.actualizar(id, { nombre, especialidad, disponibilidad });
       if (entrenadorActualizado) {
-        res.json(entrenadorActualizado);
+        return res.json(entrenadorActualizado);
       } else {
-        res.status(404).json({ mensaje: 'Entrenador no encontrado' });
+        return res.status(404).json({ mensaje: 'Entrenador no encontrado' });
       }
-      res.json(entrenador);
     } catch (error) {
       console.error(error);
       res.status(500).json({ mensaje: 'Error al actualizar entrenador' });
     }
   },
 
-  // Eliminar un entrenador
   eliminar: async (req, res) => {
     const { id } = req.params;
     try {
-      await EntrenadorModel.eliminar(req.params.id);
-      res.json({ mensaje: 'Entrenador eliminado' });
+      const entrenadorEliminado = await entrenadorModel.eliminar(id);
+      if (entrenadorEliminado) {
+        res.json({ mensaje: 'Entrenador eliminado correctamente' });
+      } else {
+        res.status(404).json({ mensaje: 'Entrenador no encontrado' });
+      }
     } catch (error) {
       console.error(error);
       res.status(500).json({ mensaje: 'Error al eliminar entrenador' });

@@ -1,6 +1,5 @@
 import pool from '../config/db.js';
 
-
 const planModel = {
   obtenerTodos: async () => {
     const res = await pool.query('SELECT * FROM planes');
@@ -9,6 +8,11 @@ const planModel = {
 
   crear: async (plan) => {
     const { nombre, descripcion, dificultad, duracion, precio } = plan;
+
+    if (!nombre || !descripcion || !dificultad || duracion == null || precio == null) {
+      throw new Error('Todos los campos son obligatorios para crear un plan');
+    }
+
     const res = await pool.query(
       'INSERT INTO planes (nombre, descripcion, dificultad, duracion, precio) VALUES ($1, $2, $3, $4, $5) RETURNING *',
       [nombre, descripcion, dificultad, duracion, precio]
@@ -17,11 +21,13 @@ const planModel = {
   },
 
   obtenerPorId: async (id) => {
+    if (!id) throw new Error('ID es obligatorio para obtener plan');
     const res = await pool.query('SELECT * FROM planes WHERE id_planes = $1', [id]);
-    return res.rows[0];
+    return res.rows[0] || null;
   },
 
   eliminar: async (id) => {
+    if (!id) throw new Error('ID es obligatorio para eliminar plan');
     const res = await pool.query('DELETE FROM planes WHERE id_planes = $1 RETURNING *', [id]);
     if (res.rowCount === 0) {
       throw new Error('Plan no encontrado para eliminar');
@@ -33,7 +39,7 @@ const planModel = {
     const { nombre, descripcion, dificultad, duracion, precio } = datos;
 
     if (!id || !nombre || !descripcion || !dificultad || duracion == null || precio == null) {
-      throw new Error('Todos los campos son obligatorios');
+      throw new Error('Todos los campos son obligatorios para actualizar un plan');
     }
 
     const query = `

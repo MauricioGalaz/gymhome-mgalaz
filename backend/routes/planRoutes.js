@@ -1,24 +1,24 @@
-import express from 'express';
-import planController from '../controllers/planController.js';
+import express from 'express'
+import planController from '../controllers/planController.js'
 import { verificarToken } from '../middleware/verificarToken.js';
 import { verificarRol } from '../middleware/verificarRol.js';
 
-const router = express.Router();
 
+const router = express.Router()
 
+router.get('/', planController.listarPlanes)
 
-router.get('/', planController.listarPlanes);
-
-
-router.get('/:id', planController.obtenerPlan);
+router.get('/:id', planController.obtenerPlan)
 
 // Crear plan (solo admin o entrenador)
 router.post(
   '/',
   verificarToken,
-  verificarRol(['admin', 'entrenador']),
+  
+  router.get('/algo', verificarToken, verificarRol ),
+
   planController.crearPlan
-);
+)
 
 // Editar plan (solo admin o entrenador)
 router.put(
@@ -26,7 +26,7 @@ router.put(
   verificarToken,
   verificarRol(['admin', 'entrenador']),
   planController.editarPlan
-);
+)
 
 // Eliminar plan (solo admin o entrenador)
 router.delete(
@@ -34,6 +34,6 @@ router.delete(
   verificarToken,
   verificarRol(['admin', 'entrenador']),
   planController.eliminarPlan
-);
+)
 
-export default router;
+export default router

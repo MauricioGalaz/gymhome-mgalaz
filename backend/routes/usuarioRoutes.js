@@ -23,7 +23,7 @@ router.post(
 router.post('/login', usuarioController.login);
 
 // Obtener por email
-router.get('/email/:email', usuarioController.obtenerPorEmail);
+router.get('/email/:email', usuarioController.obtenerPorId);
 
 // Listar nombres
 router.get('/nombres', usuarioController.listarNombres);
@@ -51,5 +51,11 @@ router.delete('/:id', verificarToken, verificarRol(['admin', 'entrenador']), usu
 
 router.get('/perfil', verificarToken, usuarioController.obtenerPerfil);
 
+router.get('/perfil', verificarToken, (req, res) => {
+  res.json({
+    mensaje: 'Perfil del usuario autenticado',
+    usuario: req.usuario, 
+  });
+});
 
 export default router;

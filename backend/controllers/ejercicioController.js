@@ -1,10 +1,10 @@
-import pool from '../config/db.js';
+import ejercicioModel from '../models/ejercicioModel.js';
 
 const EjercicioController = {
   listarEjercicios: async (req, res) => {
     try {
-      const resultado = await pool.query('SELECT * FROM ejercicios');
-      res.json(resultado.rows);
+      const ejercicios = await ejercicioModel.obtenerTodos();
+      res.json(ejercicios);
     } catch (error) {
       console.error('Error al obtener ejercicios:', error);
       res.status(500).json({ mensaje: 'Error al obtener ejercicios' });
@@ -12,63 +12,55 @@ const EjercicioController = {
   },
 
   obtenerEjercicioPorId: async (req, res) => {
-    const { id } = req.params;
     try {
-      const resultado = await pool.query(
-        'SELECT * FROM ejercicios WHERE id = $1',
-        [id]
-      );
-      if (resultado.rows.length === 0) {
+      const { id } = req.params;
+      const ejercicio = await ejercicioModel.obtenerPorId(id);
+      if (!ejercicio) {
         return res.status(404).json({ mensaje: 'Ejercicio no encontrado' });
       }
-      res.json(resultado.rows[0]);
+      res.json(ejercicio);
     } catch (error) {
-      console.error('Error al obtener el ejercicio:', error);
+      console.error('Error al obtener ejercicio:', error);
       res.status(500).json({ mensaje: 'Error al obtener el ejercicio' });
     }
   },
 
   crearEjercicio: async (req, res) => {
-    const { nombre, descripcion } = req.body;
     try {
-      const resultado = await pool.query(
-        'INSERT INTO ejercicios (nombre, descripcion, tipo, duracion) VALUES ($1, $2, $3, $4) RETURNING *',
-        [nombre, descripcion, tipo, duracion]
-      );
-      res.status(201).json(resultado.rows[0]);
+      const { nombre, descripcion, tipo, duracion } = req.body;
+      const nuevoEjercicio = await ejercicioModel.crear({ nombre, descripcion, tipo, duracion });
+      res.status(201).json(nuevoEjercicio);
     } catch (error) {
-      console.error('Error al crear el ejercicio:', error);
+      console.error('Error al crear ejercicio:', error);
       res.status(500).json({ mensaje: 'Error al crear el ejercicio' });
     }
   },
 
   actualizarEjercicio: async (req, res) => {
-    const { id } = req.params;
-    const { nombre, descripcion } = req.body;
     try {
-      const resultado = await pool.query(
-        'UPDATE ejercicios SET nombre = $1, descripcion = $2, tipo = $3, duracion = $4 WHERE id = $5 RETURNING *',
-        [nombre, descripcion, tipo, duracion, id]
-      );
-      if (resultado.rows.length === 0) {
+      const { id } = req.params;
+      const { nombre, descripcion, tipo, duracion } = req.body;
+      const ejercicioActualizado = await ejercicioModel.actualizar(id, { nombre, descripcion, tipo, duracion });
+      if (!ejercicioActualizado) {
         return res.status(404).json({ mensaje: 'Ejercicio no encontrado' });
       }
-      res.json(resultado.rows[0]);
+      res.json(ejercicioActualizado);
     } catch (error) {
-      console.error('Error al actualizar el ejercicio:', error);
+      console.error('Error al actualizar ejercicio:', error);
       res.status(500).json({ mensaje: 'Error al actualizar el ejercicio' });
     }
   },
 
   eliminarEjercicio: async (req, res) => {
-    const { id } = req.params;
     try {
-      const resultado = await pool.query('DELETE FROM ejercicios WHERE id = $1 RETURNING *', [id]);
-      if (resultado.rows.length === 0) {
+      const { id } = req.params;
+      const ejercicioEliminado = await ejercicioModel.eliminar(id);
+      if (!ejercicioEliminado) {
         return res.status(404).json({ mensaje: 'Ejercicio no encontrado' });
       }
       res.json({ mensaje: 'Ejercicio eliminado correctamente' });
     } catch (error) {
+      console.error('Error al eliminar ejercicio:', error);
       res.status(500).json({ mensaje: 'Error al eliminar el ejercicio' });
     }
   }

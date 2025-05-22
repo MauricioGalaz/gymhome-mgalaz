@@ -1,6 +1,5 @@
 import { Pool } from 'pg';
 
-// Configuración de la conexión con la base de datos
 const pool = new Pool({
   user: 'postgres',
   host: 'localhost',
@@ -9,7 +8,6 @@ const pool = new Pool({
   port: 5432
 });
 
-
 const listarProgresoPorUsuario = async (usuarioId) => {
   const result = await pool.query(
     'SELECT id_progreso, id_usuarios, id_planes, avance, fecha FROM progresousuario WHERE id_usuarios = $1', 
@@ -17,7 +15,6 @@ const listarProgresoPorUsuario = async (usuarioId) => {
   );
   return result.rows;
 };
-
 
 const registrarProgreso = async (progreso) => {
   const { id_usuarios, id_planes, avance, fecha } = progreso;
@@ -36,5 +33,8 @@ const obtenerProgresoPorId = async (id) => {
   return result.rows[0];
 };
 
-
-export default { listarProgresoPorUsuario, registrarProgreso, obtenerProgresoPorId };
+export default { 
+  listarProgresoPorUsuario, 
+  registrarProgreso, 
+  obtenerProgresoPorId 
+};

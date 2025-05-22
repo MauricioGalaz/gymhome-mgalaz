@@ -1,5 +1,6 @@
 import progresoModel from '../models/progresoModel.js';
 
+// Crear un nuevo registro de progreso
 const crearProgreso = async (req, res) => {
   try {
     const nuevoProgreso = await progresoModel.registrarProgreso(req.body);
@@ -10,6 +11,7 @@ const crearProgreso = async (req, res) => {
   }
 };
 
+// Listar progresos por ID de usuario
 const listarProgresosPorUsuario = async (req, res) => {
   const { id_usuarios } = req.params;
   try {
@@ -21,7 +23,7 @@ const listarProgresosPorUsuario = async (req, res) => {
   }
 };
 
-
+// Obtener progreso por ID de progreso
 const obtenerProgresoPorId = async (req, res) => {
   const { id } = req.params;
   try {
@@ -37,8 +39,21 @@ const obtenerProgresoPorId = async (req, res) => {
   }
 };
 
+// ✅ Nuevo: Obtener progreso del usuario autenticado (desde token)
+const obtenerProgresoDelToken = async (req, res) => {
+  try {
+    const usuarioId = req.usuario.id;
+    const progresos = await progresoModel.listarProgresoPorUsuario(usuarioId);
+    res.json(progresos);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: 'Error al obtener el progreso del usuario' });
+  }
+};
+
 export default {
   crearProgreso,
   listarProgresosPorUsuario,
-  obtenerProgresoPorId
+  obtenerProgresoPorId,
+  obtenerProgresoDelToken 
 };

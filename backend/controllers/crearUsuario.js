@@ -4,23 +4,23 @@ import db from '../config/db.js';
 const crearUsuario = async () => {
   try {
     const nombre = 'Mauro';
-    const email = 'mauro@gmail.com';
+    const correo = 'mauro@gmail.com';  // Usar 'correo' si esa es la columna correcta
     const contrasena = '12345678';
     const rol = 'usuario';
 
     const hash = await bcrypt.hash(contrasena, 10);
 
     await db.none(
-      'INSERT INTO usuarios (nombre, email, contrasena, rol) VALUES ($1, $2, $3, $4)',
-      [nombre, email, hash, rol]
+      'INSERT INTO usuarios (nombre, correo, contrasena, rol) VALUES ($1, $2, $3, $4)',
+      [nombre, correo, hash, rol]
     );
 
     console.log('✅ Usuario creado exitosamente');
-    process.exit();
+    process.exit(0);
   } catch (error) {
     console.error('❌ Error al crear usuario:', error.message);
     process.exit(1);
   }
 };
-export default crearUsuario;
 
+export default crearUsuario;

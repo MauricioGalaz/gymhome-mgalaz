@@ -1,6 +1,16 @@
 import sesionModel from '../models/sesionModel.js';
 
 const sesionController = {
+  listarTodas: async (req, res) => {
+    try {
+      const sesiones = await sesionModel.obtenerTodas();
+      res.json(sesiones);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ mensaje: 'Error al obtener sesiones' });
+    }
+  },
+
   listarPorUsuario: async (req, res) => {
     const { id_usuarios } = req.params;
     try {

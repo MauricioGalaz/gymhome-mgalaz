@@ -1,8 +1,7 @@
-import pool from '../config/db.js';
+import pool from '../config/db.js'
 import planModel from '../models/planModel.js';
 
 const planController = {
- 
   listarPlanes: async (req, res) => {
     try {
       const result = await pool.query('SELECT * FROM planes');
@@ -13,10 +12,10 @@ const planController = {
     }
   },
 
- 
   obtenerPlan: async (req, res) => {
     const { id } = req.params;
     try {
+      // Aquí se usa el planModel para obtener por id, si existe
       const plan = await planModel.obtenerPorId(id);
       if (!plan) {
         return res.status(404).json({ mensaje: 'Plan no encontrado' });
@@ -27,7 +26,6 @@ const planController = {
       res.status(500).json({ mensaje: 'Error interno del servidor' });
     }
   },
-
 
   crearPlan: async (req, res) => {
     const { nombre, descripcion, dificultad, precio, duracion } = req.body;
@@ -46,9 +44,8 @@ const planController = {
     }
   },
 
-  
   editarPlan: async (req, res) => {
-    const { id } = req.params; 
+    const { id } = req.params;
     const { nombre, descripcion, dificultad, precio, duracion } = req.body;
 
     if (!nombre || !descripcion || !dificultad || precio == null || duracion == null) {
@@ -71,7 +68,6 @@ const planController = {
       res.status(500).json({ mensaje: 'Error interno del servidor' });
     }
   },
-
 
   eliminarPlan: async (req, res) => {
     const { id } = req.params;

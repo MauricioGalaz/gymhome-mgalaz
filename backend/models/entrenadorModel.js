@@ -2,13 +2,8 @@ import pool from '../config/db.js';
 
 const entrenadorModel = {
   listar: async () => {
-    try {
-      const result = await pool.query('SELECT * FROM entrenadores');
-      return result.rows;
-    } catch (err) {
-      console.error('Error al listar entrenadores:', err.message);
-      throw err;
-    }
+    const result = await pool.query('SELECT * FROM entrenadores');
+    return result.rows;
   },
 
   crear: async (entrenador) => {
@@ -35,7 +30,8 @@ const entrenadorModel = {
   },
 
   eliminar: async (id) => {
-    await pool.query('DELETE FROM entrenadores WHERE id = $1', [id]);
+    const res = await pool.query('DELETE FROM entrenadores WHERE id = $1 RETURNING *', [id]);
+    return res.rows[0]; // Si no hay rows, no encontró el entrenador
   }
 };
 
